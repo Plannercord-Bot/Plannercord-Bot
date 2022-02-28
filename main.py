@@ -3,8 +3,8 @@ from discord.ext import commands
 import os
 
 bot_token = os.environ['bot_token']
-
-bot = commands.Bot(command_prefix=";")
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=";",intents=intents)
 
 # Import cogs from cogs folder
 for filename in os.listdir('./cogs'):

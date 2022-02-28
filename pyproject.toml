@@ -6,10 +6,9 @@ authors = ["blueemma <<>>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-orjson = "^3.6.7"
-typing-extensions = "^4.1.1"
+pymongo = "^4.0.1"
+dnspython = "^2.2.0"
 "discord.py" = "^1.7.3"
-discord = "^1.7.3"
 
 [tool.poetry.dev-dependencies]
 
