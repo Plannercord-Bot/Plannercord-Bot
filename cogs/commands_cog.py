@@ -32,11 +32,15 @@ class SystemListeners(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send('{}, that command does not exist.'.format(ctx.author.mention))
 
+
+
 class TestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     #Commands
-    
+
+      
+    ## Ping Command
     @commands.command(
       help = "Play ping-pong with me", #shows when ;help [command] called
       brief = "Prints pong" #shows when ;help is called 
@@ -47,7 +51,8 @@ class TestCommands(commands.Cog):
         return
       await ctx.channel.send("pong") #bot reply
 
-  
+      
+    ## Hi Command
     @commands.command(
       help = "Hello!", #shows when ;help [command] called
       brief = "Say hi to me!" #shows when ;help is called
@@ -58,7 +63,8 @@ class TestCommands(commands.Cog):
         return
       await ctx.send(f"hello, {ctx.author.mention}")
 
-  
+      
+    ## Hello Command
     @commands.command(
       help = "Tag the person you want to say hello to", #shows when ;help [command] called
       brief = "Say hello to someone!" #shows when ;help is called
@@ -80,7 +86,8 @@ class TestCommands(commands.Cog):
         if greetUsers != "":
           await ctx.send("Hello, " + greetUsers + "!") #bot reply if correct parameters
 
-  
+          
+    ## Say Command
     @commands.command(
       help = "Repeats any message you send with this command", #shows when ;help [command] called
       brief = "Repeats what you say" #shows when ;help is called
@@ -94,7 +101,8 @@ class TestCommands(commands.Cog):
           response = response + " " + arg
       await ctx.channel.send(response)
 
-
+      
+    ## DBsend Command
     @commands.command(
       help = "Test command for database communication", #shows when ;help [command] called
       brief = "Test command for db comm" #shows when ;help is called
