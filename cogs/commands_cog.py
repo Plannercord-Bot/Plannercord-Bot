@@ -69,17 +69,22 @@ class TestCommands(commands.Cog):
       help = "Tag the person you want to say hello to", #shows when ;help [command] called
       brief = "Say hello to someone!" #shows when ;help is called
     )
-    async def hello(self,ctx, *users: discord.Member):
+    async def hello(self,ctx, *users):
+      print(users)
       if(len(users)==0):
         await ctx.send(f"Arguments needed for that command")
         return
+      
       else:
         greetUsers = ""
-        members = [str(i) for i in ctx.guild.members]
-        print(members)
+        memberIDs = [str(i.id) for i in ctx.guild.members]
+        members = [str(i.name) for i in ctx.guild.members]
         for user in users:
-          if(str(user) in members):
-            greetUsers +="{} ".format(user.mention)
+          if(user[3:-1] in memberIDs):
+            greetUsers +="{} ".format(ctx.guild.members[memberIDs.index(user[3:-1])].mention)
+            
+          elif(user in members):
+            greetUsers +="{} ".format(ctx.guild.members[members.index(user)].mention)
           else:
             await ctx.send(f"{user} is not a member of the server. Try checking your spelling or capitalization.")
             
