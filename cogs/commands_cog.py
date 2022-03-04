@@ -3,9 +3,20 @@ from discord.ext import commands
 import pymongo
 from pymongo import MongoClient
 import os
+from decouple import config
+
+# Import secret mongodb_server
+try:
+    mongodb_server = config('mongodb_server')
+except:
+    try:
+        mongodb_server = os.environ['mongodb_server']
+    except:
+        print("Configure mongodb server variable first")
+        quit()
 
 
-cluster = MongoClient(os.environ['mongodb_server'])
+cluster = MongoClient(mongodb_server)
 db = cluster["test"]
 collection = db["test"]
 

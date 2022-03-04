@@ -1,8 +1,20 @@
 import discord
 from discord.ext import commands
 import os
+from decouple import config
 
-bot_token = os.environ['bot_token']
+
+# Import secret bot_token
+try:
+    bot_token = config('bot_token')
+except:
+    try:
+        bot_token = os.environ['bot_token']
+    except:
+        print("Configure bot token variable first")
+        quit()
+
+
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=";",intents=intents)
 
@@ -19,3 +31,4 @@ for filename in os.listdir('./cogs'):
 
 
 bot.run(bot_token)
+
