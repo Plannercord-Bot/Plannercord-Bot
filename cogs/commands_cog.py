@@ -121,7 +121,7 @@ class TestCommands(commands.Cog):
           return
         print(type(message[0]))
         await ctx.send('{} has entered data \"{}\" into the database'.format(ctx.author.mention, message[0]))
-        collection.insert_many({"_id":message})
+        collection.insert_one({"_id":message[0]})
 
 
 
