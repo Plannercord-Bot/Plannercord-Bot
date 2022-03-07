@@ -29,7 +29,7 @@ def set_timezone(guild,offset):
         {'_id':guild.id},
         {'$set':
             {
-                'timezone':str(timedelta(hours=offset))
+                'timezone':[timedelta(hours=offset).days, timedelta(hours=offset).seconds]
             }
         })
     print("Done")
@@ -45,7 +45,7 @@ def make_server_collection(guild):
             "type":"Server Data",
             "name":guild.name,
             "time_created":datetime.utcnow(),
-            "timezone":str(timedelta(hours=8)),
+            "timezone":[timedelta(hours=8).days, timedelta(hours=8).seconds],
             }])
         return False, 0
 
@@ -53,8 +53,9 @@ def make_server_collection(guild):
     else:
         server_data = collection.find_one({"_id":guild.id})
         # Covnert time to server timezone
-        t = datetime.strptime(server_data['timezone'],"%H:%M:%S")
-        delta = timedelta(hours=t.hour, minutes=t.minute, seconds=t.second)
+        t = server_data['timezone']
+        print(t)
+        delta = timedelta(days = t[0], seconds=t[1])
         local_time = server_data['time_created'] + delta
         return True, local_time
     
