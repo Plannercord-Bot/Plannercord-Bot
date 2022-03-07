@@ -45,9 +45,7 @@ class SystemListeners(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send('{}, that command does not exist.'.format(ctx.author.mention))
 
-
-
-class TestCommands(commands.Cog):
+class ServerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     #Commands
@@ -64,14 +62,13 @@ class TestCommands(commands.Cog):
         
       server_data = make_server_collection(ctx.guild)
       message = ""
-
+      print(server_data)
       if server_data[0]:
         message = "{} is already registered with timestamp {}.\nIt already has its own collection in the database.".format(ctx.guild.name, server_data[1])
       else:
         message = "{} server successfully Registered! It now has its own collection in the database.".format(ctx.guild.name)
 
       await ctx.channel.send(message) #bot reply
-
 
     ## Metadata Command
     @commands.command(
@@ -123,6 +120,32 @@ class TestCommands(commands.Cog):
         
       else:
         await ctx.send("Argument not valid")
+
+    ## Timezone Command
+    @commands.command(
+      help = "Change the timezone of the server.", #shows when ;help [command] called
+      brief = "Change the timezone of the server. ;timezone <hours>" #shows when ;help is called 
+    )
+    async def timezone(self,ctx, *args):
+      if(len(args)<1 or len(args)>1):
+        message = "Too many arguments" if len(args)>1 else "Argument <hours> needed to change timezone"
+        await ctx.send(message)
+        return
+      try:
+        timeoffset = int(args[0])
+      except:
+        await ctx.channel.send("Argument not valid") #bot reply
+        return
+      
+      set_timezone(ctx.guild,timeoffset)
+      await ctx.channel.send("Timezone offset successfully changed to {} hours!".format(timeoffset)) #bot reply
+      
+
+
+class TestCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+    #Commands
         
     ## Ping Command
     @commands.command(
@@ -209,28 +232,8 @@ class TestCommands(commands.Cog):
 
 
 
-class ExampleCommandGroup1(commands.Cog):
-    def __init__(self, bot):
-        self.bot = bot
-      
-    @commands.command()
-    async def command1(self,ctx, member : discord.Member, area=''):
-        if (area != ''):
-          await ctx.send('{} has <command> {} on the {}'.format(ctx.author.mention, member.mention, area))
-        else:
-          await ctx.send('{} has <command> {}'.format(ctx.author.mention, member.mention))
-
-    @commands.command()
-    async def command2(self,ctx, member : discord.Member):
-          await ctx.send('{} command {}'.format(ctx.author.mention, member.mention))
-
-    @commands.command()
-    async def command3(self,ctx, member : discord.Member):
-        await ctx.send('{} <command> {}'.format(ctx.author.mention, member.mention))
-
-
 # Add the command group classes
 def setup(bot):
   bot.add_cog(SystemListeners(bot))
+  bot.add_cog(ServerCommands(bot))
   bot.add_cog(TestCommands(bot))
-  bot.add_cog(ExampleCommandGroup1(bot))
