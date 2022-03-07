@@ -4,7 +4,7 @@ import pymongo
 from pymongo import MongoClient
 import os
 from decouple import config
-from db_func import make_server_collection
+from db_func import *
 
 # Import secret mongodb_server
 try:
@@ -61,11 +61,16 @@ class TestCommands(commands.Cog):
       if(len(args)>0):
         await ctx.send(f"Arguments not needed for that command")
         return
+        
       server_data = make_server_collection(ctx.guild)
+      message = ""
+
       if server_data[0]:
-        await ctx.channel.send("Server was already registered with timestamp {}\nand has its own collection in the database.\nIts unique ID is {}".format(server_data[1], ctx.guild.id)) #bot reply
+        message = "{} is already registered with timestamp {}.\nIt already has its own collection in the database.".format(ctx.guild.name, server_data[1])
       else:
-        await ctx.channel.send("Server successfully Registered! Your server now has its own collection in the database\nwith its unique ID {}".format(ctx.guild.id)) #bot reply
+        message = "{} server successfully Registered! It now has its own collection in the database.".format(ctx.guild.name)
+
+      await ctx.channel.send(message) #bot reply
 
 
     ## Metadata Command
