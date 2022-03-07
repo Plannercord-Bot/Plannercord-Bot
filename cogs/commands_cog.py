@@ -49,8 +49,58 @@ class TestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     #Commands
-
       
+    ## Metadata Command
+    @commands.command(
+      help = "Returns important metadata for database attributes", #shows when ;help [command] called
+      brief = "Returns important metadata" #shows when ;help is called 
+    )
+    async def meta(self,ctx, *args):
+      if(len(args)==0):
+        guildID = ctx.guild.id
+        message = ""
+        for i in ctx.guild.members:
+          if i.bot == True:
+            pass
+          else:
+            message += ("Guild ID: {}\n"
+                       "User ID: {}\n"
+                       "Username: {}\n"
+                       "Display Name: {}\n"
+                       "Discriminator: {}\n"
+                       "Roles: {}\n\n".format(guildID,i.id,i.name,i.display_name,i.discriminator,[j.id for j in i.roles]))
+        await ctx.send(message) #bot reply
+      elif(len(args)>1):
+        await ctx.send(f"Too many arguments")
+        return
+      
+      if(args[0] == "Guild"):
+        print(ctx.guild.id)
+        await ctx.send(f"Guild ID: {ctx.guild.id}")
+
+      elif(args[0] == "UserID"):
+        print(ctx.author.id)
+        await ctx.send(f"User ID: {ctx.author.id}")
+
+      elif(args[0] == "Username"):
+        print(ctx.author.name)
+        await ctx.send(f"Username: {ctx.author.name}")
+        
+      elif(args[0] == "DisplayName"):
+        print(ctx.author.display_name)
+        await ctx.send(f"Display Name: {ctx.author.display_name}")
+
+      elif(args[0] == "Discriminator"):
+        print(ctx.author.discriminator)
+        await ctx.send(f"Discriminator: {ctx.author.discriminator}")
+
+      elif(args[0] == "Roles"):
+        print([i.id for i in ctx.author.roles])
+        await ctx.send(f"Roles: {[i.id for i in ctx.author.roles]}")
+        
+      else:
+        await ctx.send("Argument not valid")
+        
     ## Ping Command
     @commands.command(
       help = "Play ping-pong with me", #shows when ;help [command] called
