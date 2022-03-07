@@ -21,6 +21,19 @@ db = cluster["test"]
 collection = db["test_collection"]
 
 
+def set_timezone(guild,offset):
+    collection = db[str(guild.id)]
+    print(type(offset))
+    print(collection.find_one({'_id':guild.id}))
+    collection.find_one_and_update(
+        {'_id':guild.id},
+        {'$set':
+            {
+                'timezone':str(timedelta(hours=offset))
+            }
+        })
+    print("Done")
+    print(collection.find_one({'_id':guild.id}))
 
 def make_server_collection(guild):
     collection = db[str(guild.id)]
@@ -31,7 +44,7 @@ def make_server_collection(guild):
             {"_id":guild.id,
             "type":"Server Data",
             "name":guild.name,
-            "time_created":datetime.now(),
+            "time_created":datetime.utcnow(),
             "timezone":str(timedelta(hours=8)),
             }])
         return False, 0
