@@ -1,2 +1,4 @@
 cogs/__pycache__
 .env
+poetry.lock
+pyproject.toml
