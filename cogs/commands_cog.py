@@ -4,6 +4,7 @@ import pymongo
 from pymongo import MongoClient
 import os
 from decouple import config
+from functions import make_server_collection
 
 # Import secret mongodb_server
 try:
@@ -16,9 +17,10 @@ except:
         quit()
 
 
+
 cluster = MongoClient(mongodb_server)
 db = cluster["test"]
-collection = db["test"]
+collection = db["test_collection"]
 
 
 class SystemListeners(commands.Cog):
@@ -49,7 +51,22 @@ class TestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     #Commands
-      
+
+    ## Register Command
+    @commands.command(
+      help = "Register the discord server to create a database collection for the server", #shows when ;help [command] called
+      brief = "Registeration for data management" #shows when ;help is called 
+    )
+    async def server_register(self,ctx, *args):
+      if(len(args)>0):
+        await ctx.send(f"Arguments not needed for that command")
+        return
+      if make_server_collection(ctx.guild):
+        await ctx.channel.send("Server was already registered before and has its own collection in the database.\nIts unique ID is {}".format(ctx.guild.id)) #bot reply
+      else:
+        await ctx.channel.send("Server successfully Registered! Your server now has its own collection in the database\nwith its unique ID {}".format(ctx.guild.id)) #bot reply
+
+
     ## Metadata Command
     @commands.command(
       help = "Returns important metadata for database attributes", #shows when ;help [command] called
