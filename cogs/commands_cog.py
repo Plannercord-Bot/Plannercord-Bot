@@ -318,7 +318,7 @@ class CreateCommands(commands.Cog):
     ctx.author.roles
     datetime made
 
-    !optional
+    !Optional
     Description
     Deadline
     Person responsible(assigned to)
@@ -327,7 +327,9 @@ class CreateCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+
     #Commands
+
 
     ## Add Task Command
     @commands.command(
@@ -336,15 +338,21 @@ class CreateCommands(commands.Cog):
         brief="Create a task"  #shows when ;help is called 
     )
     async def addtask(self, ctx, *args):
-        string = " ".join(args)
-        print(string)
+        AgendaType = "task"
         if (len(args) < 1):
             await ctx.send(f"Missing/Incomplete arguments.")
             return
-        taskName = args[0]
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+
+        add_agenda(ctx.guild, AgendaType, args)
+        
 
         message = ""
         await ctx.channel.send(message)  #bot reply
+
 
     ## Metadata Command
     @commands.command(

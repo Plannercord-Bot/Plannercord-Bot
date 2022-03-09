@@ -76,8 +76,8 @@ def make_server_collection(guild):
         return True, local_time
 
 
-# Function that enters agenda data into the database
-def add_agenda(guild):
+# Function that enters agenda data into the database, requires AgendaType, and the arguments entered
+def add_agenda(guild, AgendaType, args):
   # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(guild.id)]
     return
