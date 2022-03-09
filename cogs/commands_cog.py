@@ -21,7 +21,14 @@ db = cluster["test"]
 collection = db["test_collection"]
 
 
-# Passive functions for debug and CommandNotFound handling
+"""
+
+System Listeners
+- Passive functions for debug and CommandNotFound handling
+
+"""
+
+
 class SystemListeners(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -44,6 +51,13 @@ class SystemListeners(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send('{}, that command does not exist.'.format(
                 ctx.author.mention))
+
+
+"""
+Server Commands
+- only administrator can use these commands
+
+"""
 
 
 # Commands that the server administrator can only use
@@ -183,6 +197,14 @@ class ServerCommands(commands.Cog):
                 timeoffset))  #bot reply
 
 
+"""
+
+Test Commands
+- prototype commands for testing
+
+"""
+
+
 class TestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -276,6 +298,14 @@ class TestCommands(commands.Cog):
         await ctx.send('{} has entered data \"{}\" into the database'.format(
             ctx.author.mention, message[0]))
         collection.insert_one({"_id": message[0]})
+
+
+"""
+
+CreateCommands
+- commands to enter agenda into the database
+
+"""
 
 
 class CreateCommands(commands.Cog):
