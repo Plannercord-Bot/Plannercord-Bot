@@ -46,7 +46,7 @@ class SystemListeners(commands.Cog):
                 ctx.author.mention))
 
 
-# Commands that the server owner
+# Commands that the server administrator can only use
 class ServerCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -160,6 +160,11 @@ class ServerCommands(commands.Cog):
         "Change the timezone of the server. ;timezone <hours>"  #shows when ;help is called 
     )
     async def timezone(self, ctx, *args):
+        # Only accept if author is administrator
+        if(ctx.author.guild_permissions.administrator != True):
+            await ctx.send(f"You do not have permissions to use that command.")
+            return
+          
         if (len(args) < 1 or len(args) > 1):
             message = "Too many arguments" if len(
                 args) > 1 else "Argument <hours> needed to change timezone"
