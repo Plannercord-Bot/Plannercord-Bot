@@ -140,8 +140,6 @@ class ServerCommands(commands.Cog):
       set_timezone(ctx.guild,timeoffset)
       await ctx.channel.send("Timezone offset successfully changed to {} hours!".format(timeoffset)) #bot reply
       
-
-
 class TestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -230,6 +228,78 @@ class TestCommands(commands.Cog):
         await ctx.send('{} has entered data \"{}\" into the database'.format(ctx.author.mention, message[0]))
         collection.insert_one({"_id":message[0]})
 
+class CreateCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+        
+    #Commands
+
+
+    ## Add Task Command
+    @commands.command(
+      help = "Create a task and store it in the database", #shows when ;help [command] called
+      brief = "Create a task" #shows when ;help is called 
+    )
+    async def addtask(self,ctx, *args):
+      string = " ".join(args)
+      print(string)
+      if(len(args)<1):
+        await ctx.send(f"Missing/Incomplete arguments.")
+        return
+      taskName = args[0]
+
+      message = ""
+      await ctx.channel.send(message) #bot reply
+
+
+    ## Metadata Command
+    @commands.command(
+      help = "Returns important metadata for database attributes", #shows when ;help [command] called
+      brief = "Returns important metadata" #shows when ;help is called 
+    )
+    async def metadata(self,ctx, *args):
+      if(len(args)==0):
+        guildID = ctx.guild.id
+        message = ""
+        for i in ctx.guild.members:
+          if i.bot == True:
+            pass
+          else:
+            message += ("Guild ID: {}\n"
+                       "User ID: {}\n"
+                       "Username: {}\n"
+                       "Display Name: {}\n"
+                       "Discriminator: {}\n"
+                       "Roles: {}\n\n".format(guildID,i.id,i.name,i.display_name,i.discriminator,[j.id for j in i.roles]))
+        await ctx.send(message) #bot reply
+      elif(len(args)>1):
+        await ctx.send(f"Too many arguments")
+        return
+      
+      if(args[0] == "Guild"):
+        await ctx.send(f"Guild ID: {ctx.guild.id}")
+
+      elif(args[0] == "UserID"):
+        await ctx.send(f"User ID: {ctx.author.id}")
+
+      elif(args[0] == "Username"):
+        await ctx.send(f"Username: {ctx.author.name}")
+        
+      elif(args[0] == "DisplayName"):
+        await ctx.send(f"Display Name: {ctx.author.display_name}")
+
+      elif(args[0] == "Discriminator"):
+        await ctx.send(f"Discriminator: {ctx.author.discriminator}")
+
+      elif(args[0] == "Roles"):
+        await ctx.send(f"Roles: {[i.id for i in ctx.author.roles]}")
+        
+      else:
+        await ctx.send("Argument not valid")
+
+    
+
 
 
 # Add the command group classes
@@ -237,3 +307,4 @@ def setup(bot):
   bot.add_cog(SystemListeners(bot))
   bot.add_cog(ServerCommands(bot))
   bot.add_cog(TestCommands(bot))
+  bot.add_cog(CreateCommands(bot))
