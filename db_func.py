@@ -54,8 +54,10 @@ def make_server_collection(guild):
         server_data = collection.find_one({"_id":guild.id})
         # Covnert time to server timezone
         t = server_data['timezone']
-        print(t)
         delta = timedelta(days = t[0], seconds=t[1])
         local_time = server_data['time_created'] + delta
         return True, local_time
     
+def add_agenda(guild):
+    collection = db[str(guild.id)]
+    return
