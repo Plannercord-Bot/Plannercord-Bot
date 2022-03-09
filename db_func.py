@@ -6,7 +6,7 @@ import os
 from decouple import config
 from datetime import datetime, timezone, timedelta
 
-# Import secret mongodb_server
+# Import secret mongodb_server, exit if not configured properly
 try:
     mongodb_server = config('mongodb_server')
 except:
@@ -16,30 +16,46 @@ except:
         print("Configure mongodb server variable first")
         quit()
 
+# Initialize Mongo Client object from MongoDB Atlass
 cluster = MongoClient(mongodb_server)
 db = cluster["test"]
+# Default collection for debugging
 collection = db["test_collection"]
 
 
+
+"""
+
+Functions
+
+"""
+
+
+# Sets the server's timezone in the database
+# The timezone is important for sending dates/reminders
 def set_timezone(guild,offset):
+    # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(guild.id)]
-    print(type(offset))
-    print(collection.find_one({'_id':guild.id}))
+    # In the collection, we will find one document and update it 
     collection.find_one_and_update(
+        # Find the document with _id set to the server/guild's id
         {'_id':guild.id},
+        # Then we use the field update operator $set to set a key-value pair in the document
         {'$set':
             {
                 'timezone':[timedelta(hours=offset).days, timedelta(hours=offset).seconds]
             }
         })
-    print("Done")
-    print(collection.find_one({'_id':guild.id}))
 
+
+# Initializes the server into the database
 def make_server_collection(guild):
+  # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(guild.id)]
 
-    # Check if guild already in database, if not, create new collection with 
+    # Check if guild already in database, if not, create new collection
     if str(guild.id) not in db.list_collection_names():
+        # Insert specific server/guild datasuch as name, time created, timezone (default is +8)
         collection.insert_many([
             {"_id":guild.id,
             "type":"Server Data",
@@ -51,13 +67,17 @@ def make_server_collection(guild):
 
     # Send guild data back to the bot
     else:
+        # Get from the database data for the specific guild/server using guild.id
         server_data = collection.find_one({"_id":guild.id})
-        # Covnert time to server timezone
+        # Convert time saved to server timezone
         t = server_data['timezone']
         delta = timedelta(days = t[0], seconds=t[1])
         local_time = server_data['time_created'] + delta
         return True, local_time
-    
+
+
+# Function that enters agenda data into the database
 def add_agenda(guild):
+  # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(guild.id)]
     return

@@ -4,7 +4,7 @@ import os
 from decouple import config
 
 
-# Import secret bot_token
+# Import secret bot_token, exit if not configured properly
 try:
     bot_token = config('bot_token')
 except:
@@ -14,7 +14,7 @@ except:
         print("Configure bot token variable first")
         quit()
 
-
+# Initialize boy
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=";",intents=intents)
 
