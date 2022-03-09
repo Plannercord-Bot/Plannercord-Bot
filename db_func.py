@@ -77,7 +77,19 @@ def make_server_collection(guild):
 
 
 # Function that enters agenda data into the database, requires AgendaType, and the arguments entered
-def add_agenda(guild, AgendaType, args):
+def add_agenda(ctx, AgendaType, args):
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return False, "Server not yet registered in the database. Please register with the command ;server_register"
   # The collection (like a sub-database) will depend on the server/guild id
-    collection = db[str(guild.id)]
-    return
+    collection = db[str(ctx.guild.id)]
+
+    # Separate args into useful
+    authorID = ctx.author.id
+    authorName = ctx.author.name
+    authorRoles = [i.id for i in ctx.author.roles]
+    if collection.find_one({"AgendaType":AgendaType, "List":args}) == None:
+        collection.insert_one({"AgendaType":AgendaType, "List":args})
+        message = "Success"
+    else:
+        message = "Data exists"
+    return True, message

@@ -331,7 +331,7 @@ class CreateCommands(commands.Cog):
     #Commands
 
 
-    ## Add Task Command
+    ## Add Task Command - Boilerplate for add agenda commands
     @commands.command(
         help=
         "Create a task and store it in the database",  #shows when ;help [command] called
@@ -346,11 +346,14 @@ class CreateCommands(commands.Cog):
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
-
-        add_agenda(ctx.guild, AgendaType, args)
         
-
         message = ""
+        status = add_agenda(ctx, AgendaType, args)
+        if (status[0]): # Successful!
+            message = status[1]
+        else:
+            message = status[1]
+
         await ctx.channel.send(message)  #bot reply
 
 
