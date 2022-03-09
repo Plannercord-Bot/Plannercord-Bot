@@ -347,12 +347,7 @@ class CreateCommands(commands.Cog):
         string = " ".join(args)
         args = string.split(";")
         
-        message = ""
-        status = add_agenda(ctx, AgendaType, args)
-        if (status[0]): # Successful!
-            message = status[1]
-        else:
-            message = status[1]
+        message = add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
