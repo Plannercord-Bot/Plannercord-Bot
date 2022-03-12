@@ -352,6 +352,48 @@ class CreateCommands(commands.Cog):
         await ctx.channel.send(message)  #bot reply
 
 
+    ## Add Project Command
+    @commands.command(
+        help=
+        "Create a project and store it in the database",  #shows when ;help [command] called
+        brief="Create a project"  #shows when ;help is called 
+    )
+    async def addproj(self, ctx, *args):
+        AgendaType = "project"
+        if (len(args) < 1):
+            await ctx.send(f"Missing/Incomplete arguments.")
+            return
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = add_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
+      
+      
+    ## Add Meeting Command
+    @commands.command(
+        help=
+        "Create a meeting and store it in the database",  #shows when ;help [command] called
+        brief="Create a meeting"  #shows when ;help is called 
+    )
+    async def addmeet(self, ctx, *args):
+        AgendaType = "meeting"
+        if (len(args) < 1):
+            await ctx.send(f"Missing/Incomplete arguments.")
+            return
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = add_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
+      
+      
     ## Metadata Command
     @commands.command(
         help=
