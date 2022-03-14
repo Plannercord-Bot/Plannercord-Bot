@@ -338,7 +338,7 @@ class CreateCommands(commands.Cog):
         brief="Create a task"  #shows when ;help is called 
     )
     async def addtask(self, ctx, *args):
-        AgendaType = "task"
+        AgendaType = "Task"
         if (len(args) < 1):
             await ctx.send(f"Missing/Incomplete arguments.")
             return
@@ -359,7 +359,7 @@ class CreateCommands(commands.Cog):
         brief="Create a project"  #shows when ;help is called 
     )
     async def addproj(self, ctx, *args):
-        AgendaType = "project"
+        AgendaType = "Project"
         if (len(args) < 1):
             await ctx.send(f"Missing/Incomplete arguments.")
             return
@@ -380,7 +380,7 @@ class CreateCommands(commands.Cog):
         brief="Create a meeting"  #shows when ;help is called 
     )
     async def addmeet(self, ctx, *args):
-        AgendaType = "meeting"
+        AgendaType = "Meeting"
         if (len(args) < 1):
             await ctx.send(f"Missing/Incomplete arguments.")
             return
@@ -445,9 +445,37 @@ class CreateCommands(commands.Cog):
             await ctx.send("Argument not valid")
 
 
+class RequestCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+
+    #Commands
+
+
+    ## Add Task Command - Boilerplate for add agenda commands
+    @commands.command(
+        help=
+        "Create a task and store it in the database",  #shows when ;help [command] called
+        brief="Create a task"  #shows when ;help is called 
+    )
+    async def task(self, ctx, *args):
+        AgendaType = "Task"
+        if (len(args) < 1):
+            await ctx.send(f"Missing/Incomplete arguments.")
+            return
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = find_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
 # Add the command group classes
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
     bot.add_cog(ServerCommands(bot))
     bot.add_cog(TestCommands(bot))
     bot.add_cog(CreateCommands(bot))
+    bot.add_cog(RequestCommands(bot))
