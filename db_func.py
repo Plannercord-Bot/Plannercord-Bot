@@ -92,11 +92,54 @@ def add_agenda(ctx, AgendaType, args):
     authorName = ctx.author.name
     authorRoles = [i.id for i in ctx.author.roles]
 
-    data = collection.find_one({"type":"Agenda","AgendaType":AgendaType, "List":args})
+    data = collection.find_one({"Type":"Agenda",
+                                "AgendaType":AgendaType, 
+                                "AuthorID":authorID, 
+                                "Assigned":authorID,
+                                "Args":args})
     print(data)
     if data == None:
-        collection.insert_one({"type":"Agenda","AgendaType":AgendaType, "List":args})
-        message = "Success"
+        collection.insert_one({ "Type":"Agenda",
+                                "AgendaType":AgendaType,
+                                "AuthorID":authorID, 
+                                "Assigned":authorID,
+                                "Args":args})
+        message = f"{AgendaType} added successfullly!"
     else:
-        message = "Data already exists: {}".format(data["List"])
+        message = f"Data already exists. \nTo update, use ;update <{AgendaType} name>"
+    return message
+
+# Function that enters agenda data into the database, requires AgendaType, and the arguments entered
+def find_agenda(ctx, AgendaType, args):
+  # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+  # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+
+    # Separate args into useful
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i!='']
+
+    authorID = ctx.author.id
+    authorName = ctx.author.name
+    authorRoles = [i.id for i in ctx.author.roles]
+
+    data = collection.find_one({"Type":"Agenda",
+                                "AgendaType":AgendaType, 
+                                "AuthorID":authorID, 
+                                "Assigned":authorID,
+                                "Args":args})
+    members = {}
+    for i in ctx.guild.members:
+        members[i.id] = i.display_name
+    if data == None:
+        message = f"Sorry, that {AgendaType} does not yet exist."
+    else:
+        message = ""
+        for i in data:
+            if(str(i) == "AuthorID" or str(i) == "Assigned"):
+                data[i] = members[data[i]]
+            message += str(i) + ": " +str(data[i]) + "\n"
+        message = "Here's what I found:\n" + message 
     return message
