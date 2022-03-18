@@ -19,8 +19,6 @@ except:
 cluster = MongoClient(mongodb_server)
 db = cluster["test"]
 collection = db["test_collection"]
-
-
 """
 
 System Listeners
@@ -67,7 +65,6 @@ class ServerCommands(commands.Cog):
 
     #Commands
 
-      
     ## Register Command to register a server and create a db collection (sub-db) for it
     @commands.command(
         help=
@@ -76,19 +73,19 @@ class ServerCommands(commands.Cog):
     )
     async def server_register(self, ctx, *args):
         # Only accept if author is administrator
-        if(ctx.author.guild_permissions.administrator != True):
+        if (ctx.author.guild_permissions.administrator != True):
             await ctx.send(f"You do not have permissions to use that command.")
             return
-          
+
         # Only accept if command has no arguments
         if (len(args) > 0):
             await ctx.send(f"Arguments not needed for that command")
             return
-          
+
         # Call function from db_func with argument ctx.guild object containing different guild/server attributes
         server_data = make_server_collection(ctx.guild)
         message = ""
-      
+
         # Check if server_data is already registered (stored in first element in return value)
         if server_data[0]:
             message = (
@@ -101,7 +98,6 @@ class ServerCommands(commands.Cog):
 
         await ctx.channel.send(message)  #bot reply
 
-      
     ## Meta Command -for debugging only; for checking some important server attributes, as well as members
     @commands.command(
         help=
@@ -110,10 +106,10 @@ class ServerCommands(commands.Cog):
     )
     async def meta(self, ctx, *args):
         # Only accept if author is administrator
-        if(ctx.author.guild_permissions.administrator != True):
+        if (ctx.author.guild_permissions.administrator != True):
             await ctx.send(f"You do not have permissions to use that command.")
             return
-          
+
         if (len(args) == 0):
             guildID = ctx.guild.id
             message = ""
@@ -126,8 +122,7 @@ class ServerCommands(commands.Cog):
                                 "Username: {}\n"
                                 "Display Name: {}\n"
                                 "Discriminator: {}\n"
-                                "Roles: {}\n\n".format(guildID, i.id, 
-                                                       i.name,
+                                "Roles: {}\n\n".format(guildID, i.id, i.name,
                                                        i.display_name,
                                                        i.discriminator,
                                                        [j.id
@@ -165,7 +160,6 @@ class ServerCommands(commands.Cog):
         else:
             await ctx.send("Argument not valid")
 
-          
     ## Timezone Command - for changing the discord server-specific timezone (for date and time)
     @commands.command(
         help=
@@ -175,10 +169,10 @@ class ServerCommands(commands.Cog):
     )
     async def timezone(self, ctx, *args):
         # Only accept if author is administrator
-        if(ctx.author.guild_permissions.administrator != True):
+        if (ctx.author.guild_permissions.administrator != True):
             await ctx.send(f"You do not have permissions to use that command.")
             return
-          
+
         if (len(args) < 1 or len(args) > 1):
             message = "Too many arguments" if len(
                 args) > 1 else "Argument <hours> needed to change timezone"
@@ -327,44 +321,53 @@ class CreateCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     #Commands
-
 
     ## Add Task Command - Boilerplate for add agenda commands
     @commands.command(
-        help=
-        "Create a task and store it in the database.\n\n"
+        help="Create a task and store it in the database.\n\n"
         "Format:\n"
-        "\t;addtask <task name>;<mm:dd:yy>;<hh:mm> \n\n"
+        "\t;addtask <task name>;<Date in mm-dd-yy>;<Time in hh:mm> \n\n"
         "Required Arguments:\n"
-        "\t<task name>"
-        ,  #shows when ;help [command] called
+        "\t<task name>",  #shows when ;help [command] called
         brief="Create a task"  #shows when ;help is called 
     )
     async def addtask(self, ctx, *args):
         AgendaType = "Task"
+        print(len(args))
         if (len(args) < 1):
             await ctx.send(f"Invalid number of Arguments.\n"
-                            "The addtask command requires Task Name argument.\n"
-                            "Type ;help addtask for more information.")
+                           "The addtask command requires Task Name argument.\n"
+                           "Type ;help addtask for more information.")
             return
 
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
-        
+
+        i = 0
+        while i < len(args):
+          print(args)
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 3):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "More arguments than required detected.\n"
+                           "Type ;help addtask for more information.")
+            return
+
         message = add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
-
     ## Add Project Command
     @commands.command(
-        help=
-        "Create a project and store it in the database.\n\n"
+        help="Create a project and store it in the database.\n\n"
         "Format:\n"
-        "\t;addproj <project name>;<mm:dd:yy>;<hh:mm> \n\n"
+        "\t;addproj <project name>;<Date in mm-dd-yy>;<Time in hh:mm> \n\n"
         "Required Arguments:\n"
         "\t<project name>",  #shows when ;help [command] called
         brief="Create a project"  #shows when ;help is called 
@@ -372,26 +375,37 @@ class CreateCommands(commands.Cog):
     async def addproj(self, ctx, *args):
         AgendaType = "Project"
         if (len(args) < 1):
-            await ctx.send(f"Invalid number of Arguments.\n"
-                            "The addproj command requires Project Name argument.\n"
-                            "Type ;help addproj] for more information.")
+            await ctx.send(
+                f"Invalid number of Arguments.\n"
+                "The addproj command requires Project Name argument.\n"
+                "Type ;help addproj for more information.")
             return
 
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
-        
+        i = 0
+        while i < len(args):
+          print(args)
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        if (len(args) > 3):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "More arguments than required detected.\n"
+                           "Type ;help addproj for more information.")
+            return
+
         message = add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
-      
-      
+
     ## Add Meeting Command
     @commands.command(
-        help=
-        "Create a meeting and store it in the database.\n\n"
+        help="Create a meeting and store it in the database.\n\n"
         "Format:\n"
-        "\t;addmeet <meeting name>;<mm:dd:yy>;<hh:mm> \n\n"
+        "\t;addmeet <meeting name>;<Date in mm-dd-yy>;<Time in hh:mm> \n\n"
         "Required Arguments:\n"
         "\t<meeting name>",  #shows when ;help [command] called
         brief="Create a meeting"  #shows when ;help is called 
@@ -399,25 +413,37 @@ class CreateCommands(commands.Cog):
     async def addmeet(self, ctx, *args):
         AgendaType = "Meeting"
         if (len(args) < 1):
-            await ctx.send(f"Invalid number of Arguments.\n"
-                            "The addmeet command requires Meeting Name argument.\n"
-                            "Type ;help addmeet for more information.")
+            await ctx.send(
+                f"Invalid number of Arguments.\n"
+                "The addmeet command requires Meeting Name argument.\n"
+                "Type ;help addmeet for more information.")
             return
 
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
-        
+        i = 0
+        while i < len(args):
+          print(args)
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        if (len(args) > 3):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "More arguments than required detected.\n"
+                           "Type ;help addmeet for more information.")
+            return
+
         message = add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
     ## Add Reminder Command
     @commands.command(
-        help=
-        "Create a reminder and store it in the database.\n\n"
+        help="Create a reminder and store it in the database.\n\n"
         "Format:\n"
-        "\t;addrem <reminder name>;<mm:dd:yy>;<hh:mm> \n\n"
+        "\t;addrem <reminder name>;<Date in mm-dd-yy>;<Time in hh:mm> \n\n"
         "Required Arguments:\n"
         "\t<reminder name>",  #shows when ;help [command] called
         brief="Create a reminder"  #shows when ;help is called 
@@ -425,28 +451,38 @@ class CreateCommands(commands.Cog):
     async def addrem(self, ctx, *args):
         AgendaType = "Reminder"
         if (len(args) < 1):
-            await ctx.send(f"Invalid number of Arguments.\n"
-                            "The addrem command requires Reminder Name argument.\n"
-                            "Type ;help addrem for more information.")
+            await ctx.send(
+                f"Invalid number of Arguments.\n"
+                "The addrem command requires Reminder Name argument.\n"
+                "Type ;help addrem for more information.")
             return
 
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
-        
+        i = 0
+        while i < len(args):
+          print(args)
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        if (len(args) > 3):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "More arguments than required detected.\n"
+                           "Type ;help addrem for more information.")
+            return
+
         message = add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
-      
 
 
 class RequestCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-
     #Commands
-
 
     ## Request Task Command - Boilerplate for requesting agenda data commands
     @commands.command(
@@ -462,7 +498,7 @@ class RequestCommands(commands.Cog):
         AgendaType = "Task"
         if (len(args) < 1 or len(args) > 1):
             await ctx.send(f"Invalid number of arguments.\n"
-                            "The task command requires Task ID argument.\n"
+                            "The task command requires only Task ID argument.\n"
                             "Type ;help task for more information.")
             return
         try:
@@ -470,6 +506,7 @@ class RequestCommands(commands.Cog):
         except:
             await ctx.channel.send( "Argument must be integer.\n"
                                     "Type ;help task for more information.")  #bot reply
+            return
         # Arguments after command are joined and manually separated using specified delimiter ';'
         string = " ".join(args)
         args = string.split(";")
@@ -478,6 +515,95 @@ class RequestCommands(commands.Cog):
 
         await ctx.channel.send(message)  #bot reply
 
+    @commands.command(
+        help=
+        "Request specific project data from the database\n\n"
+        "Format:\n"
+        "\t;proj <proj id>\n\n"
+        "Required Arguments:\n"
+        "\t<project id> - use command ;projs to know project IDs",  #shows when ;help [command] called
+        brief="Request project data"  #shows when ;help is called 
+    )
+    async def proj(self, ctx, *args):
+        AgendaType = "Project"
+        if (len(args) < 1 or len(args) > 1):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The proj command requires only Project ID argument.\n"
+                            "Type ;help proj for more information.")
+            return
+        try:
+            int(args[0])
+        except:
+            await ctx.channel.send( "Argument must be integer.\n"
+                                    "Type ;help proj for more information.")  #bot reply
+            return
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = find_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
+
+    @commands.command(
+        help=
+        "Request specific meeting data from the database\n\n"
+        "Format:\n"
+        "\t;meet <meeting id>\n\n"
+        "Required Arguments:\n"
+        "\t<meeting id> - use command ;meets to know meeting IDs",  #shows when ;help [command] called
+        brief="Request meeting data"  #shows when ;help is called 
+    )
+    async def meet(self, ctx, *args):
+        AgendaType = "Meeting"
+        if (len(args) < 1 or len(args) > 1):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The meet command requires only Meeting ID argument.\n"
+                            "Type ;help meet for more information.")
+            return
+        try:
+            int(args[0])
+        except:
+            await ctx.channel.send( "Argument must be integer.\n"
+                                    "Type ;help meet for more information.")  #bot reply
+            return
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = find_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
+
+    @commands.command(
+        help=
+        "Request specific reminder data from the database\n\n"
+        "Format:\n"
+        "\t;rem <reminder id>\n\n"
+        "Required Arguments:\n"
+        "\t<reminder id> - use command ;rems to know reminder IDs",  #shows when ;help [command] called
+        brief="Request reminder data"  #shows when ;help is called 
+    )
+    async def rem(self, ctx, *args):
+        AgendaType = "Reminder"
+        if (len(args) < 1 or len(args) > 1):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The rem command requires only Reminder ID argument.\n"
+                            "Type ;help rem for more information.")
+            return
+        try:
+            int(args[0])
+        except:
+            await ctx.channel.send( "Argument must be integer.\n"
+                                    "Type ;help rem for more information.")  #bot reply
+            return
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        
+        message = find_agenda(ctx, AgendaType, args)
+
+        await ctx.channel.send(message)  #bot reply
     
     ## Request All Tasks Command - 
     @commands.command(
@@ -501,7 +627,75 @@ class RequestCommands(commands.Cog):
         message = list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(message)  #bot reply
+    
+    ## Request All Projects Command - 
+    @commands.command(
+        help=
+        "Request all Projects with Project ID from the database\n\n"
+        "Format:\n"
+        "\t;projs\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all projects"  #shows when ;help is called 
+    )
+    async def projs(self, ctx, *args):
+        AgendaType = "Project"
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The projs command requires no argument.\n"
+                            "Type ;help projs for more information.")
+            return
 
+        
+        message = list_agenda(ctx, AgendaType)
+
+        await ctx.channel.send(message)  #bot reply
+
+    ## Request All Meetings Command - 
+    @commands.command(
+        help=
+        "Request all Meetings with Meeting ID from the database\n\n"
+        "Format:\n"
+        "\t;meets\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all meetings"  #shows when ;help is called 
+    )
+    async def meets(self, ctx, *args):
+        AgendaType = "Meeting"
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The meets command requires no argument.\n"
+                            "Type ;help meets for more information.")
+            return
+
+        
+        message = list_agenda(ctx, AgendaType)
+
+        await ctx.channel.send(message)  #bot reply
+
+    ## Request All Reminders Command - 
+    @commands.command(
+        help=
+        "Request all Reminders with Reminder ID from the database\n\n"
+        "Format:\n"
+        "\t;rems\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all reminders"  #shows when ;help is called 
+    )
+    async def rems(self, ctx, *args):
+        AgendaType = "Reminder"
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The rems command requires no argument.\n"
+                            "Type ;help rems for more information.")
+            return
+
+        
+        message = list_agenda(ctx, AgendaType)
+
+        await ctx.channel.send(message)  #bot reply
 
 
 # Add the command group classes
