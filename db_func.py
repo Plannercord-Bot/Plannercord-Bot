@@ -74,6 +74,10 @@ def make_server_collection(guild):
             "Project": [],
             "Reminder": [],
             "Meeting": [],
+            "MyTask": [],
+            "MyProject": [],
+            "MyMeeting": [],
+            "MyReminder": [],
         }])
         return False, 0
 
@@ -290,7 +294,7 @@ def list_agenda(ctx, AgendaType):
             agenda = collection.find_one({"_id": i})["Args"]
             print(agenda)
             message += AgendaType + " " + str(
-                AgendaIDList.index(i)) + "\t" + agenda[0] + "\n"
+                AgendaIDList.index(i)) + " \t" + agenda[0] + "\n"
             AgendaList.append(agenda[0])
     else:
         message = "Nothing found."
