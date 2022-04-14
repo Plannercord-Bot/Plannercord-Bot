@@ -5,6 +5,7 @@ from pymongo import MongoClient
 import os
 from decouple import config
 from db_func import *
+from datetime import datetime, date, timedelta
 
 # Import secret mongodb_server
 try:
@@ -35,6 +36,7 @@ class SystemListeners(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Plannercord online')
+        await periodic_checker(self.bot)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -293,7 +295,25 @@ class TestCommands(commands.Cog):
             ctx.author.mention, message[0]))
         collection.insert_one({"_id": message[0]})
 
+    ## Test Reminder Command
+    @commands.command(
+        help=
+        "Test command for reminder testing",  #shows when ;help [command] called
+        brief="Test command for reminder"  #shows when ;help is called
+    )
+    async def testrem(self, ctx, *args):
+        await ctx.send("Start")
+        await periodic_checker(ctx)
 
+    ## Test Function Command
+    @commands.command(
+        help=
+        "Debug command, only use when you know what to do",  #shows when ;help [command] called
+        brief="Debug command"  #shows when ;help is called
+    )
+    async def testfunc(self, ctx, *args):
+        await ctx.send("Test Start")
+        await testfunction(ctx)
 """
 
 CreateCommands

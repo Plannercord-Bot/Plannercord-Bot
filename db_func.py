@@ -6,6 +6,7 @@ from pymongo import MongoClient
 import os
 from decouple import config
 from datetime import datetime, date, timedelta
+import asyncio
 
 # Import secret mongodb_server, exit if not configured properly
 try:
@@ -97,8 +98,32 @@ def add_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
     if str(ctx.guild.id) not in db.list_collection_names():
         return "Server not yet registered in the database. Please register with the command ;server_register"
+
 # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(ctx.guild.id)]
+
+    if AgendaType in ["Reminder", "MyReminder"]:
+        channels = [i.name for i in ctx.guild.channels]
+        for j in channels:
+            print(j)
+            print(type(j))
+        if "bot-reminders" not in channels:
+            return "Please make a Text Channel with name bot-reminders. Make sure that it is public."
+        else:
+            for i in ctx.guild.channels:
+                if i.name == "bot-reminders":
+                    channel = i.id
+                    print("bot-reminders Channel has ID: " + str(channel))
+                    collection.insert_one({
+                        "Type": "ReminderChannel",
+                        "ChannelID": channel
+                    })
+                    break
+            # Check if ctx.guild.channels has Bot_Reminders Channel
+                # If not, return message to make a Reminders channel first
+                # If yes, add channel ID to database in a new document
+
+
 
     # Separate args into useful
     args = [i.strip() for i in args]
@@ -299,3 +324,99 @@ def list_agenda(ctx, AgendaType):
     else:
         message = "Nothing found."
     return message
+
+def reminder_check(ctx, AgendaType, args):
+    pass
+    # Only proceed if server is registered
+    
+
+async def periodic_checker(bot): # This will run every 60 seconds to check the reminders in each collection in the database
+    while(True):
+        print()
+        then = datetime.utcnow().replace(second=0, microsecond=0) + timedelta(seconds=60)       # The next time when this function will run (The one we will compare with the reminder date and time)
+        print("Then:" + str(then))
+        waittime = (then - datetime.utcnow()).total_seconds()                                   # The total time to wait until the next run
+        print("Wait Time:" + str(waittime))
+        await asyncio.sleep(waittime)                                                           # Wait until the next run
+
+
+        # Check Reminders in each collection in the database  
+        db_collections = db.list_collection_names() 
+        for i in db_collections: 
+            try:
+                guild = bot.get_guild(int(i))
+                collection = db[i]
+                t = collection.find_one({"_id": int(i)})['timezone']
+                delta = timedelta(days=t[0], seconds=t[1])
+                then_with_offset = then + delta
+                print("Then with offset:" + str(then_with_offset))
+
+                channelID = collection.find_one({"Type": "ReminderChannel"})["ChannelID"]   # Get the channel ID from the database
+                channel = bot.get_channel(channelID)                                        # Get the channel object from the bot
+                Agenda = collection.find_one({"Type": "AgendaTable"})                       # Get the agenda table from the database
+                ReminderList = Agenda["Reminder"] + Agenda["MyReminder"]                    # Get the reminder list from the agenda table
+                
+                if (len(ReminderList) > 0):
+                    for i in ReminderList:
+                        reminder = collection.find_one({"_id": i})
+                        reminder_args = reminder["Args"]
+                        try:
+                            rem_time = reminder_args[1]
+                            print("\tRem Time:" + str(rem_time))
+                            if(rem_time == then_with_offset):
+                                message = formattedAgenda(reminder, guild.members, "Reminder")
+                                await channel.send(message)
+                                # collection.delete_one({"_id": i})
+                                print("Reminder sent")
+                        except:
+                            print("No Rem Time for " + str(i))
+                
+            except:
+                print("No reminder found in collection " + i)
+        # Get the reminder channel to send reminders              
+        # Send the message to the channels                      
+        # Delete the reminder from the database                
+
+async def testfunction(ctx):
+    print(ctx.guild.channels)
+    for i in ctx.guild.channels:
+        print(i.id)
+
+def formattedAgenda(data, guild_members, AgendaType):
+    members = {}
+    # Temporarily store member display names
+    for i in guild_members:
+        members[i.id] = i.display_name
+
+    # Check if data of agenda exists
+
+    if data == None:
+        return "Sorry, that {} does not yet exist.".format(AgendaType)
+    else:
+
+        # Data Formatting
+
+        message = ""
+        for i in data:
+            # If attribute is AuthorID and Assigned, substitute to Display name
+            if (str(i) == "AuthorID" or str(i) == "Assigned"):
+                data[i] = members[data[i]]
+
+            # Do not include attributes _id and Type in message
+            Exclude = ["Type", "_id", "Args"]
+            if (str(i) not in Exclude):
+                toSend = data[i]
+                if (i == "AuthorID"):
+                    i = "Made by"
+                elif (i == "Assigned"):
+                    i = "Assigned to"
+                elif (i == "AgendaType"):
+                    i = "Type"
+                message += str(i) + ": " + str(toSend) + "\n"
+        args = data['Args']
+        for i in range(len(args)):
+            attributes = ["Name: ", "Date & Time: "]
+            message += attributes[i] + str(args[i]) + "\n"
+
+        message = "Here's what I found:\n\n" + message
+        return message
