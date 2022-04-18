@@ -71,7 +71,7 @@ class ServerCommands(commands.Cog):
     @commands.command(
         help=
         "Register the discord server to create a database collection for the server",  #shows when ;help [command] called
-        brief="Registeration for data management"  #shows when ;help is called 
+        brief="Registration for data management"  #shows when ;help is called 
     )
     async def server_register(self, ctx, *args):
         # Only accept if author is administrator
@@ -314,6 +314,7 @@ class TestCommands(commands.Cog):
     async def testfunc(self, ctx, *args):
         await ctx.send("Test Start")
         await testfunction(ctx)
+
 """
 
 CreateCommands
@@ -379,7 +380,7 @@ class CreateGroupCommands(commands.Cog):
                            "Type ;help addtask for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -417,7 +418,7 @@ class CreateGroupCommands(commands.Cog):
                            "Type ;help addproj for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -455,7 +456,7 @@ class CreateGroupCommands(commands.Cog):
                            "Type ;help addmeet for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -493,7 +494,7 @@ class CreateGroupCommands(commands.Cog):
                            "Type ;help addrem for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -554,7 +555,7 @@ class CreatePersonalCommands(commands.Cog):
                            "Type ;help addmytask for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -592,7 +593,7 @@ class CreatePersonalCommands(commands.Cog):
                            "Type ;help addmyproj for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -630,7 +631,7 @@ class CreatePersonalCommands(commands.Cog):
                            "Type ;help addmymeet for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -668,7 +669,7 @@ class CreatePersonalCommands(commands.Cog):
                            "Type ;help addmyrem for more information.")
             return
 
-        message = add_agenda(ctx, AgendaType, args)
+        message = await add_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 

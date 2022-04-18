@@ -1,4 +1,3 @@
-from email.utils import localtime
 import discord
 from discord.ext import commands
 import pymongo
@@ -92,9 +91,68 @@ def make_server_collection(guild):
         local_time = server_data['time_created'] + delta
         return True, local_time
 
+# Function for Bot to add channel to server
+async def add_channel(ctx, collection, channel_name):
+    channels = [i.name for i in ctx.guild.channels]
+    if channel_name not in channels:
+        channel = await ctx.guild.create_text_channel(channel_name)
+        await channel.send("Start of {} channel".format(channel_name))
+
+        # Add channel to database collection
+        try:
+            collection.insert_one({
+                "_id": "ReminderChannel",
+                "ChannelID": channel
+            })
+        except:
+            collection.update_one({
+                "_id": "ReminderChannel"
+            }, {
+                "$set": {
+                    "ChannelID": channel
+                }
+            })
+    else:
+        # Check if channel exists in server
+        for i in ctx.guild.channels:
+            if i.name == channel_name:
+                channel = i.id
+                # Try to add channel to database collection
+                try:
+                    collection.insert_one({
+                        "_id": "ReminderChannel",
+                        "ChannelID": channel
+                    })
+                except:
+                    collection.update_one({
+                        "_id": "ReminderChannel"
+                    }, {
+                        "$set": {
+                            "ChannelID": channel
+                        }
+                    })
+                break
+
+# This is executed at the start of the bot and runs every 60 seconds to run periodic tasks (like reminders)
+async def periodic_checker(bot): 
+    while(True):
+        print("Now: " + str(datetime.utcnow()))
+        # Compute for next minute store in "then"
+        then = datetime.utcnow().replace(second=0, microsecond=0) + timedelta(seconds=60)       # The next time when this function will run (The one we will compare with the reminder date and time)
+        # Compute for wait time in seconds
+        wait_time = (then - datetime.utcnow()).total_seconds()                                   # The total time to wait until the next run
+        # Sleep for waittime
+        await asyncio.sleep(wait_time)                                                           # Wait until the next run
+
+        # FUNCTIONS TO RUN AFTER HERE
+
+        await agendaTimeCheck(bot, then)                                              # Check if any agenda is due for notification
+
+
+
 
 # Function that enters agenda data into the database, requires AgendaType, and the arguments entered
-def add_agenda(ctx, AgendaType, args):
+async def add_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
     if str(ctx.guild.id) not in db.list_collection_names():
         return "Server not yet registered in the database. Please register with the command ;server_register"
@@ -102,28 +160,8 @@ def add_agenda(ctx, AgendaType, args):
 # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(ctx.guild.id)]
 
-    if AgendaType in ["Reminder", "MyReminder"]:
-        channels = [i.name for i in ctx.guild.channels]
-        for j in channels:
-            print(j)
-            print(type(j))
-        if "bot-reminders" not in channels:
-            return "Please make a Text Channel with name bot-reminders. Make sure that it is public."
-        else:
-            for i in ctx.guild.channels:
-                if i.name == "bot-reminders":
-                    channel = i.id
-                    print("bot-reminders Channel has ID: " + str(channel))
-                    collection.insert_one({
-                        "Type": "ReminderChannel",
-                        "ChannelID": channel
-                    })
-                    break
-            # Check if ctx.guild.channels has Bot_Reminders Channel
-                # If not, return message to make a Reminders channel first
-                # If yes, add channel ID to database in a new document
-
-
+    # Add channel named bot-reminders
+    await add_channel(ctx, collection, "bot-reminders")
 
     # Separate args into useful
     args = [i.strip() for i in args]
@@ -198,7 +236,6 @@ def add_agenda(ctx, AgendaType, args):
         "Assigned": authorID,
         "Args": args
     })
-    print(data)
     if data == None:
         collection.insert_one({
             "Type": "Agenda",
@@ -325,98 +362,113 @@ def list_agenda(ctx, AgendaType):
         message = "Nothing found."
     return message
 
-def reminder_check(ctx, AgendaType, args):
-    pass
+
+def update_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+
+
+
+
+async def agendaTimeCheck(bot, then):
     
+    db_collections = db.list_collection_names()                                             # Get the list of collections in the database
 
-async def periodic_checker(bot): # This will run every 60 seconds to check the reminders in each collection in the database
-    while(True):
-        print()
-        then = datetime.utcnow().replace(second=0, microsecond=0) + timedelta(seconds=60)       # The next time when this function will run (The one we will compare with the reminder date and time)
-        print("Then:" + str(then))
-        waittime = (then - datetime.utcnow()).total_seconds()                                   # The total time to wait until the next run
-        print("Wait Time:" + str(waittime))
-        await asyncio.sleep(waittime)                                                           # Wait until the next run
+    # Iterate through each collection to check if any agenda is due
+    for i in db_collections:                        
+            try:    # Try first if the collection has an agenda table with contents
+                guild = bot.get_guild(int(i))                                               # Get the guild object from discord
+                collection = db[i]                                                          # Get the collection object from the database
 
-
-        # Check Reminders in each collection in the database  
-        db_collections = db.list_collection_names() 
-        for i in db_collections: 
-            try:
-                guild = bot.get_guild(int(i))
-                collection = db[i]
-                t = collection.find_one({"_id": int(i)})['timezone']
+                t = collection.find_one({"_id": int(i)})['timezone']                        # Find the timezone of the server
                 delta = timedelta(days=t[0], seconds=t[1])
                 then_with_offset = then + delta
-                print("Then with offset:" + str(then_with_offset))
 
-                channelID = collection.find_one({"Type": "ReminderChannel"})["ChannelID"]   # Get the channel ID from the database
-                channel = bot.get_channel(channelID)                                        # Get the channel object from the bot
-                Agenda = collection.find_one({"Type": "AgendaTable"})                       # Get the agenda table from the database
-                ReminderList = Agenda["Reminder"] + Agenda["MyReminder"]                    # Get the reminder list from the agenda table
                 
-                if (len(ReminderList) > 0):
-                    for i in ReminderList:
-                        reminder = collection.find_one({"_id": i})
-                        reminder_args = reminder["Args"]
-                        try:
-                            rem_time = reminder_args[1]
-                            print("\tRem Time:" + str(rem_time))
-                            if(rem_time == then_with_offset):
-                                message = formattedAgenda(reminder, guild.members, "Reminder")
+
+                # Get the channel object from the bot
+                channel = bot.get_channel(collection.find_one({"_id": "ReminderChannel"})["ChannelID"]) 
+                Agenda = collection.find_one({"Type": "AgendaTable"})                       # Get the agenda table from the database
+
+
+                # Create an agenda list for each discord server
+                AgendaList = []
+                for i in Agenda:                          # For each agenda type, merge items to master list
+                    if i not in ["Type","_id"]:
+                        AgendaList.extend(Agenda[i])
+                
+                
+                if (len(AgendaList) > 0):
+                # For each agenda in the masterlist, check their details (deadline, reminder) to check if it is due for notification
+                    for i in AgendaList:                
+                        agenda_details = collection.find_one({"_id": i})      
+                        agenda_args = agenda_details["Args"]
+                        try:        # Try to check if the agenda has a reminder
+                            argPosition = 1
+                            if agenda_details["AgendaType"] in ["Reminder", "MyReminder"]:      # This is specific for reminders
+                            
+                                argPosition = 1
+                            else:
+                                argPosition = 1
+
+                            alert_time = agenda_args[argPosition]
+                            
+                            # Compare alert_time to the next minute, if equal, send a message
+                            if(alert_time == then_with_offset):
+                                message = formattedAlert(agenda_details, guild)
                                 await channel.send(message)
                                 # collection.delete_one({"_id": i})
-                                print("Reminder sent")
+                            print("\tAlert Time: " + str(alert_time))
                         except:
-                            print("No Rem Time for " + str(i))
+                            print("\tNo Rem Time for " + str(i))
                 
             except:
-                print("No reminder found in collection " + i)
-        # Get the reminder channel to send reminders              
-        # Send the message to the channels                      
-        # Delete the reminder from the database                
+                print("No reminder found in collection " + i)   
 
-async def testfunction(ctx):
-    print(ctx.guild.channels)
-    for i in ctx.guild.channels:
-        print(i.id)
-
-def formattedAgenda(data, guild_members, AgendaType):
+# Alert message is formatted here:
+def formattedAlert(data, guild):
     members = {}
     # Temporarily store member display names
-    for i in guild_members:
-        members[i.id] = i.display_name
+    for i in guild.members:
+        members[i.id] = i.mention
 
-    # Check if data of agenda exists
+    author = ""
+    assigned = ""
+    message = ""
+    for i in data:
+        # If attribute is AuthorID and Assigned, substitute to Display name
+        if (str(i) == "AuthorID"):
+            author = members[data[i]]
+            data[i] = author
+        if (str(i) == "Assigned"):
+            assigned = members[data[i]]
+            data[i] = assigned
 
-    if data == None:
-        return "Sorry, that {} does not yet exist.".format(AgendaType)
-    else:
+        # Do not include attributes _id and Type in message
+        Exclude = ["Type", "_id", "Args"]
+        if (str(i) not in Exclude):
+            toSend = data[i]
+            if (i == "AuthorID"):
+                i = "Made by"
+            elif (i == "Assigned"):
+                i = "Assigned to"
+            elif (i == "AgendaType"):
+                i = "Type"
+            message += str(i) + ": " + str(toSend) + "\n"
+    args = data['Args']
+    for i in range(len(args)):
+        attributes = ["Name: ", "Date & Time: "]
+        message += attributes[i] + str(args[i]) + "\n"
 
-        # Data Formatting
+    message = "{} Alert!\n\n".format(data["AgendaType"]) + message + "\n"
+    return message           
 
-        message = ""
-        for i in data:
-            # If attribute is AuthorID and Assigned, substitute to Display name
-            if (str(i) == "AuthorID" or str(i) == "Assigned"):
-                data[i] = members[data[i]]
 
-            # Do not include attributes _id and Type in message
-            Exclude = ["Type", "_id", "Args"]
-            if (str(i) not in Exclude):
-                toSend = data[i]
-                if (i == "AuthorID"):
-                    i = "Made by"
-                elif (i == "Assigned"):
-                    i = "Assigned to"
-                elif (i == "AgendaType"):
-                    i = "Type"
-                message += str(i) + ": " + str(toSend) + "\n"
-        args = data['Args']
-        for i in range(len(args)):
-            attributes = ["Name: ", "Date & Time: "]
-            message += attributes[i] + str(args[i]) + "\n"
 
-        message = "Here's what I found:\n\n" + message
-        return message
+
+
+
+
+async def testfunction(ctx):
+    pass
