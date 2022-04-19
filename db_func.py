@@ -135,12 +135,16 @@ async def add_channel(ctx, collection, channel_name):
 
 # This is executed at the start of the bot and runs every 60 seconds to run periodic tasks (like reminders)
 async def periodic_checker(bot): 
+    now = datetime.utcnow()
+    then = now.replace(second=0, microsecond=0)
     while(True):
+        print()
         print("Now: " + str(datetime.utcnow()))
         # Compute for next minute store in "then"
-        then = datetime.utcnow().replace(second=0, microsecond=0) + timedelta(seconds=60)       # The next time when this function will run (The one we will compare with the reminder date and time)
+        then = then + timedelta(minutes=1)       # The next time when this function will run (The one we will compare with the reminder date and time)
         # Compute for wait time in seconds
         wait_time = (then - datetime.utcnow()).total_seconds()                                   # The total time to wait until the next run
+        print("Wait Time: " + str(wait_time))
         # Sleep for waittime
         await asyncio.sleep(wait_time)                                                           # Wait until the next run
 
