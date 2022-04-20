@@ -233,13 +233,13 @@ async def add_agenda(ctx, AgendaType, args):
     authorID = ctx.author.id
     authorName = ctx.author.name
     authorRoles = [i.id for i in ctx.author.roles]
-
     data = collection.find_one({
         "Type": "Agenda",
         "AgendaType": AgendaType,
         "AuthorID": authorID,
         "Assigned": authorID,
-        "Args": args
+        "Args": args,
+        "GroupID" : authorRoles[-1]
     })
     if data == None:
         collection.insert_one({
@@ -247,14 +247,16 @@ async def add_agenda(ctx, AgendaType, args):
             "AgendaType": AgendaType,
             "AuthorID": authorID,
             "Assigned": authorID,
-            "Args": args
+            "Args": args,
+            "GroupID" : authorRoles[-1]
         })
         currentAgenda = collection.find_one({
             "Type": "Agenda",
             "AgendaType": AgendaType,
             "AuthorID": authorID,
             "Assigned": authorID,
-            "Args": args
+            "Args": args,
+            "GroupID" : authorRoles[-1]
         })
         table = collection.find_one({"Type": "AgendaTable"})
 
@@ -295,9 +297,17 @@ def find_agenda(ctx, AgendaType, args):
     if (int(args[0]) > len(AgendaIDList) - 1):
         return "Sorry, that {} does not yet exist.".format(AgendaType)
 
+
+
+
     # Data Querying
 
     data = collection.find_one({"_id": AgendaIDList[int(args[0])]})
+
+    # Check if user is allowed to view the data (check if user is the author or if user is in the same group)
+    if data["GroupID"] not in authorRoles and data["AuthorID"] != authorID and data["Assigned"] != authorID:
+        return "You do not have the permission to view this {}.".format(AgendaType)
+
     members = {}
 
     # Temporarily store member display names
@@ -337,8 +347,8 @@ def find_agenda(ctx, AgendaType, args):
         message = "Here's what I found:\n\n" + message
     return message
 
+def personal_find_agenda(ctx, AgendaType, args):
 
-def list_agenda(ctx, AgendaType):
     # Only proceed if server is registered
     if str(ctx.guild.id) not in db.list_collection_names():
         return "Server not yet registered in the database. Please register with the command ;server_register"
@@ -347,27 +357,200 @@ def list_agenda(ctx, AgendaType):
     # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(ctx.guild.id)]
 
+    # Separate args into useful
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i != '']
+
     authorID = ctx.author.id
     authorName = ctx.author.name
     authorRoles = [i.id for i in ctx.author.roles]
 
-    # Data Querying
     table = collection.find_one({"Type": "AgendaTable"})
     AgendaIDList = table[AgendaType]
-    AgendaList = []
-    message = ""
-    if (len(AgendaIDList) > 0):
-        for i in AgendaIDList:
-            agenda = collection.find_one({"_id": i})["Args"]
-            print(agenda)
-            message += AgendaType + " " + str(
-                AgendaIDList.index(i)) + " \t" + agenda[0] + "\n"
-            AgendaList.append(agenda[0])
+
+    if (int(args[0]) > len(AgendaIDList) - 1):
+        return "Sorry, that {} does not yet exist.".format(AgendaType)
+
+
+
+
+    # Data Querying
+
+    data = collection.find_one({"_id": AgendaIDList[int(args[0])]})
+
+    # Check if user is allowed to view the data (check if user is the author or if user is in the same group)
+    if data["AuthorID"] != authorID or data["Assigned"] != authorID:
+        return "You do not have the permission to view this {}.".format(AgendaType[2:])
+
+    members = {}
+
+    # Temporarily store member display names
+    for i in ctx.guild.members:
+        members[i.id] = i.display_name
+
+    # Check if data of agenda exists
+
+    if data == None:
+        return "Sorry, that {} does not yet exist.".format(AgendaType)
     else:
-        message = "Nothing found."
+
+        # Data Formatting
+
+        message = ""
+        for i in data:
+            # If attribute is AuthorID and Assigned, substitute to Display name
+            if (str(i) == "AuthorID" or str(i) == "Assigned"):
+                data[i] = members[data[i]]
+
+            # Do not include attributes _id and Type in message
+            Exclude = ["Type", "_id", "Args"]
+            if (str(i) not in Exclude):
+                toSend = data[i]
+                if (i == "AuthorID"):
+                    i = "Made by"
+                elif (i == "Assigned"):
+                    i = "Assigned to"
+                elif (i == "AgendaType"):
+                    i = "Type"
+                message += str(i) + ": " + str(toSend) + "\n"
+        args = data['Args']
+        for i in range(len(args)):
+            attributes = ["Name: ", "Date & Time: "]
+            message += attributes[i] + str(args[i]) + "\n"
+
+        message = "Here's what I found:\n\n" + message
+    return message
+
+# Function that lists agenda by agendaType as asked by Author and Assigned
+def list_agenda(ctx, AgendaType, args=None):
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorRoles = [i.name for i in ctx.author.roles]
+    authorID = ctx.author.id
+    authorRoleIDList = []
+    # Separate args into useful
+    if args != None and len(args) != 0:
+        # Checking for specific group tasks
+        args = [i.strip() for i in args]
+        args = [i.strip() for i in args if i != '']
+        if args[0] not in authorRoles:
+            return "Group/Role not found."              # If author not member of group/role entered, return
+
+        for i in ctx.author.roles:
+            if i.name == args[0]:
+                authorRoleIDList.append(i.id)
+                break
+    else:
+        # Check for all tasks in all roles
+        authorRoleIDList = [i.id for i in ctx.author.roles]
+    
+
+    
+    # Data Querying, get the AgendaTable
+    table = collection.find_one({"Type": "AgendaTable"})
+
+    message = ""
+    for RoleID in authorRoleIDList:
+        submessage = ""
+        Role = ctx.guild.get_role(RoleID)
+        RoleName = Role.name
+        if(RoleName == "@everyone"):
+            RoleName = "everyone"
+        submessage += "{}:\n".format(RoleName) 
+        AgendaIDList = table[AgendaType]
+        
+
+        # Check each entry in the AgendaTable
+        if (len(AgendaIDList) > 0):
+            for i in AgendaIDList:
+                agendaDetails = collection.find_one({"_id": i})
+                agendaArguments = agendaDetails['Args']
+                agendaName = agendaArguments[0]
+                
+                # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
+                if agendaDetails["GroupID"] != RoleID:
+                    continue
+
+                # Append to message
+                submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+            if submessage == "{}:\n".format(RoleName):
+                submessage += "Nothing found."
+        else:
+            submessage += "Nothing found."
+        message += submessage +"\n"
+
     return message
 
 
+def personal_list_agenda(ctx, AgendaType, args=None):
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorRoles = [i.name for i in ctx.author.roles]
+    print("Author Roles: {}".format(ctx.author.roles))
+    # Separate args into useful
+    print("Arguments: {}".format(args))
+    if args != None and len(args) != 0:
+        # Checking for specific group tasks
+        args = [i.strip() for i in args]
+        args = [i.strip() for i in args if i != '']
+        if args[0] not in authorRoles:
+            return "Group/Role not found."
+
+    print("Hello")
+    authorID = ctx.author.id
+    # authorRoleID = 0
+    # for i in ctx.author.roles:
+    #     if i.name == args[0]:
+    #         authorRoleID = i.id
+    authorRoles = [i.id for i in ctx.author.roles]
+
+    # Data Querying
+    table = collection.find_one({"Type": "AgendaTable"})
+
+    AgendaTypes = [AgendaType]
+    if AgendaType in ["MyTask","MyProject", "MyMeeting", "MyReminder"]:
+        AgendaTypes.append(AgendaType[2:])
+
+    print("I am here: {}".format(AgendaTypes))
+    message = ""
+    for AType in AgendaTypes:
+        message += "{}s:\n".format(AType)
+        AgendaIDList = table[AType]
+        
+
+        # Check each entry in the AgendaTable
+        if (len(AgendaIDList) > 0):
+            for i in AgendaIDList:
+                agendaDetails = collection.find_one({"_id": i})
+                agendaArguments = agendaDetails['Args']
+                agendaName = agendaArguments[0]
+                
+                # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
+                if agendaDetails["GroupID"] not in authorRoles and agendaDetails["AuthorID"] != authorID and agendaDetails["Assigned"] != authorID:
+                    continue
+
+                # Append to message
+                message += AType + " " + str(
+                    AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+            if len(message) == 0:
+                message += "Nothing found for you."
+        else:
+            message += "Nothing found."
+        message += "\n"
+
+    return message
+
+# Function that updates agenda depending on author permissions (if author is part of group)
 def update_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
     if str(ctx.guild.id) not in db.list_collection_names():
@@ -375,7 +558,7 @@ def update_agenda(ctx, AgendaType, args):
 
 
 
-
+# Checks all Agenda in all collections if there is a Reminder or Deadline (and reminder set for that agenda)
 async def agendaTimeCheck(bot, then):
     
     db_collections = db.list_collection_names()                                             # Get the list of collections in the database
@@ -451,8 +634,7 @@ def formattedAlert(data, guild):
             data[i] = assigned
 
         # Do not include attributes _id and Type in message
-        Exclude = ["Type", "_id", "Args"]
-        if (str(i) not in Exclude):
+        if (str(i) not in ["Type", "_id", "Args"]):
             toSend = data[i]
             if (i == "AuthorID"):
                 i = "Made by"

@@ -806,92 +806,131 @@ class RequestGroupCommands(commands.Cog):
     ## Request All Group Tasks Command - 
     @commands.command(
         help=
-        "Request all Group Tasks with Task ID from the database\n\n"
+        "Request all Group Tasks with Task ID from the database. First argument is Role/Group name.\n\n"
         "Format:\n"
-        "\t;tasks\n\n"
+        "\t;tasks Role_Name\n\n"
         "Required Arguments:\n"
         "\tNone",  #shows when ;help [command] called
         brief="Request all group tasks"  #shows when ;help is called 
     )
     async def tasks(self, ctx, *args):
         AgendaType = "Task"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The tasks command requires no argument.\n"
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The tasks command can accept only 1 argument.\n"
                             "Type ;help tasks for more information.")
             return
-
         
-        message = list_agenda(ctx, AgendaType)
+        message = list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your group tasks are:\n{message}")  #bot reply
     
     ## Request All Group Projects Command - 
     @commands.command(
         help=
-        "Request all Group Projects with Project ID from the database\n\n"
+        "Request all Group Projects with Project ID from the database. First argument is Role/Group name.\n\n"
         "Format:\n"
-        "\t;projs\n\n"
+        "\t;projs Role_Name\n\n"
         "Required Arguments:\n"
         "\tNone",  #shows when ;help [command] called
         brief="Request all group projects"  #shows when ;help is called 
     )
     async def projs(self, ctx, *args):
         AgendaType = "Project"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The projs command requires no argument.\n"
-                            "Type ;help projs for more information.")
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The tasks command can accept only 1 argument.\n"
+                            "Type ;help tasks for more information.")
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your group projects are:\n{message}")  #bot reply
 
     ## Request All Group Meetings Command - 
     @commands.command(
         help=
-        "Request all Group Meetings with Meeting ID from the database\n\n"
+        "Request all Group Meetings with Meeting ID from the database. First argument is Role/Group name.\n\n"
         "Format:\n"
-        "\t;meets\n\n"
+        "\t;meets Role_Name\n\n"
         "Required Arguments:\n"
         "\tNone",  #shows when ;help [command] called
         brief="Request all group meetings"  #shows when ;help is called 
     )
     async def meets(self, ctx, *args):
         AgendaType = "Meeting"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The meets command requires no argument.\n"
-                            "Type ;help meets for more information.")
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The tasks command can accept only 1 argument.\n"
+                            "Type ;help tasks for more information.")
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your group meetings are:\n{message}")  #bot reply
 
     ## Request All Group Reminders Command - 
     @commands.command(
         help=
-        "Request all Group Reminders with Reminder ID from the database\n\n"
+        "Request all Group Reminders with Reminder ID from the database. First argument is Role/Group name.\n\n"
         "Format:\n"
-        "\t;rems\n\n"
+        "\t;rems Role_Name\n\n"
         "Required Arguments:\n"
         "\tNone",  #shows when ;help [command] called
         brief="Request all group reminders"  #shows when ;help is called 
     )
     async def rems(self, ctx, *args):
         AgendaType = "Reminder"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The rems command requires no argument.\n"
-                            "Type ;help rems for more information.")
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The tasks command can accept only 1 argument.\n"
+                            "Type ;help tasks for more information.")
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your group reminders are:\n{message}")  #bot reply
 
@@ -930,7 +969,7 @@ class RequestPersonalCommands(commands.Cog):
         string = " ".join(args)
         args = string.split(";")
         
-        message = find_agenda(ctx, AgendaType, args)
+        message = personal_find_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -961,7 +1000,7 @@ class RequestPersonalCommands(commands.Cog):
         string = " ".join(args)
         args = string.split(";")
         
-        message = find_agenda(ctx, AgendaType, args)
+        message = personal_find_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
 
@@ -992,7 +1031,7 @@ class RequestPersonalCommands(commands.Cog):
         string = " ".join(args)
         args = string.split(";")
         
-        message = find_agenda(ctx, AgendaType, args)
+        message = personal_find_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
       
@@ -1023,14 +1062,14 @@ class RequestPersonalCommands(commands.Cog):
         string = " ".join(args)
         args = string.split(";")
         
-        message = find_agenda(ctx, AgendaType, args)
+        message = personal_find_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(message)  #bot reply
     
     ## Request All Personal Tasks Command - 
     @commands.command(
         help=
-        "Request all Personal Tasks with Task ID from the database\n\n"
+        "Request all Personal Tasks with Task ID and the ones assigned or created by you from the database\n\n"
         "Format:\n"
         "\t;mytasks\n\n"
         "Required Arguments:\n"
@@ -1046,14 +1085,14 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal tasks are:\n{message}")  #bot reply
     
     ## Request All Personal Projects Command - 
     @commands.command(
         help=
-        "Request all Personal Projects with Project ID from the database\n\n"
+        "Request all Personal Projects with Project ID and the ones assigned or created by you from the database\n\n"
         "Format:\n"
         "\t;myprojs\n\n"
         "Required Arguments:\n"
@@ -1069,14 +1108,14 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal projects are:\n{message}")  #bot reply
 
     ## Request All Personal Meetings Command - 
     @commands.command(
         help=
-        "Request all Personal Meetings with Meeting ID from the database\n\n"
+        "Request all Personal Meetings with Meeting ID and the ones assigned or created by you from the database\n\n"
         "Format:\n"
         "\t;mymeets\n\n"
         "Required Arguments:\n"
@@ -1092,14 +1131,14 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal meetings are:\n{message}")  #bot reply
 
     ## Request All Personal Reminders Command - 
     @commands.command(
         help=
-        "Request all Personal Reminders with Reminder ID from the database\n\n"
+        "Request all Personal Reminders with Reminder ID and the ones assigned or created by you from the database\n\n"
         "Format:\n"
         "\t;myrems\n\n"
         "Required Arguments:\n"
@@ -1115,7 +1154,7 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal reminders are:\n{message}")  #bot reply
       
