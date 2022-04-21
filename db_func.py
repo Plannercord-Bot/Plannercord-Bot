@@ -688,7 +688,41 @@ def formattedAlert(data, guild):
 
 
 
+def delete_agenda(ctx, args):
+    # args[0] = Agenda Type and args[1] = Agenda ID
+    
+    # Strip extra spaces from arguments
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i != '']
 
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorRoleIDList = [i.id for i in ctx.author.roles]
+    table = collection.find_one({"Type": "AgendaTable"})
+    AgendaIDList = table[args[0]]
+
+    # Seek agenda in collection and check permissions
+    if(len(AgendaIDList) > 0):
+        try:
+            AgendaID = AgendaIDList[int(args[1])]
+            agendaDetails = collection.find_one({"_id": AgendaID})
+            if agendaDetails["GroupID"] in authorRoleIDList and(agendaDetails["AuthorID"] == ctx.author.id and agendaDetails["Assigned"] == ctx.author.id):
+                collection.delete_one({"_id": AgendaID})
+                collection.update_one({"Type": "AgendaTable"}, {"$pull": {args[0]: AgendaID}})
+                return "Agenda deleted."
+            else:
+                return "You do not have permissions to delete this agenda."
+            
+        except:
+            return "Task not found."
+        
+    else:
+        return "Task not found."
 
 
 async def testfunction(ctx):

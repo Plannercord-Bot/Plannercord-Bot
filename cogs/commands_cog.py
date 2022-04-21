@@ -944,7 +944,6 @@ class RequestGroupCommands(commands.Cog):
 
         await ctx.channel.send(f"{ctx.author.mention} your group reminders are:\n{message}")  #bot reply
 
-
 # Add the command group classes
 class RequestPersonalCommands(commands.Cog):
     def __init__(self, bot):
@@ -1207,7 +1206,47 @@ class RequestPersonalCommands(commands.Cog):
         message = personal_list_agenda(ctx, AgendaType)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal reminders are:\n{message}")  #bot reply
-      
+
+class UpdateCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    #Commands
+
+    ## Request Personal Task Command
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+    async def delete(self, ctx, *args):
+        if (len(args) < 2 or len(args) > 2):
+            await ctx.send(f"Invalid number of arguments.\n"
+                            "The delete command requires Agenda Type and Agenda ID argument.\n"
+                            "Type ;help delete for more information.")
+            return
+        if args[0] not in ["Task", "Project", "Meeting", "Reminder"]:
+            await ctx.send(f"Invalid Agenda Type.\n"
+                            "The delete command requires Agenda Type and Agenda ID argument.\n"
+                            "Type ;help delete for more information.")
+            return
+        try:
+            int(args[1])
+        except:
+            await ctx.channel.send( "Second Argument must be integer.\n"
+                                    "Type ;help delete for more information.")  #bot reply
+            return
+        
+        
+        message = delete_agenda(ctx, args)
+
+        await ctx.channel.send(message)  #bot reply
+
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
     bot.add_cog(ServerCommands(bot))
@@ -1216,3 +1255,4 @@ def setup(bot):
     bot.add_cog(CreatePersonalCommands(bot))
     bot.add_cog(RequestGroupCommands(bot))
     bot.add_cog(RequestPersonalCommands(bot))
+    bot.add_cog(UpdateCommands(bot))
