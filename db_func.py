@@ -20,8 +20,7 @@ except:
 # Initialize Mongo Client object from MongoDB Atlass
 cluster = MongoClient(mongodb_server)
 db = cluster["test"]
-# Default collection for debugging
-collection = db["test_collection"]
+
 """
 
 Functions
@@ -153,6 +152,10 @@ async def periodic_checker(bot):
 
         await agendaTimeCheck(bot, then)                                              # Check if any agenda is due for notification
 
+async def delCollection(ctx):
+    ctx.guild.id
+    db.drop_collection(str(ctx.guild.id))
+    pass
 
 
 
@@ -433,6 +436,7 @@ def list_agenda(ctx, AgendaType, args=None):
     authorRoles = [i.name for i in ctx.author.roles]
     authorID = ctx.author.id
     authorRoleIDList = []
+
     # Separate args into useful
     if args != None and len(args) != 0:
         # Checking for specific group tasks
@@ -448,8 +452,6 @@ def list_agenda(ctx, AgendaType, args=None):
     else:
         # Check for all tasks in all roles
         authorRoleIDList = [i.id for i in ctx.author.roles]
-    
-
     
     # Data Querying, get the AgendaTable
     table = collection.find_one({"Type": "AgendaTable"})
@@ -487,45 +489,77 @@ def list_agenda(ctx, AgendaType, args=None):
     return message
 
 
-def personal_list_agenda(ctx, AgendaType, args=None):
+def personal_list_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
     if str(ctx.guild.id) not in db.list_collection_names():
         return "Server not yet registered in the database. Please register with the command ;server_register"
 
-
+    print("1")
     # The collection (like a sub-database) will depend on the server/guild id
     collection = db[str(ctx.guild.id)]
     authorRoles = [i.name for i in ctx.author.roles]
-    print("Author Roles: {}".format(ctx.author.roles))
+    authorID = ctx.author.id
+    authorRoleIDList = []
+    print("2")
     # Separate args into useful
-    print("Arguments: {}".format(args))
+    # Check if there is a specified Group/Role asked
     if args != None and len(args) != 0:
         # Checking for specific group tasks
         args = [i.strip() for i in args]
         args = [i.strip() for i in args if i != '']
         if args[0] not in authorRoles:
-            return "Group/Role not found."
-
-    print("Hello")
-    authorID = ctx.author.id
-    # authorRoleID = 0
-    # for i in ctx.author.roles:
-    #     if i.name == args[0]:
-    #         authorRoleID = i.id
-    authorRoles = [i.id for i in ctx.author.roles]
-
-    # Data Querying
+            return "Group/Role not found."          # If author not member of group/role entered, return
+        for i in ctx.author.roles:
+            if i.name == args[0]:
+                authorRoleIDList.append(i.id)
+                break
+    else:
+        # If not Store All Roles/Groups of author
+        authorRoleIDList = [i.id for i in ctx.author.roles]
+    print("3")
+    # Data Querying, get the AgendaTable
     table = collection.find_one({"Type": "AgendaTable"})
 
-    AgendaTypes = [AgendaType]
-    if AgendaType in ["MyTask","MyProject", "MyMeeting", "MyReminder"]:
-        AgendaTypes.append(AgendaType[2:])
-
-    print("I am here: {}".format(AgendaTypes))
+    # AgendaTypes = [AgendaType]
+    # if AgendaType in ["MyTask","MyProject", "MyMeeting", "MyReminder"]:
+    #     AgendaTypes.append(AgendaType[2:])
     message = ""
-    for AType in AgendaTypes:
-        message += "{}s:\n".format(AType)
-        AgendaIDList = table[AType]
+    if args == None or len(args) == 0:
+        print("4")
+    # Personal Agenda first (Non-group)
+        message += "Personal {}s:\n".format(AgendaType[2:])
+        AgendaIDList = table[AgendaType]
+
+        # Check each entry in the AgendaTable
+        if (len(AgendaIDList) > 0):
+            for i in AgendaIDList:
+                agendaDetails = collection.find_one({"_id": i})
+                agendaArguments = agendaDetails['Args']
+                agendaName = agendaArguments[0]
+                
+                # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
+                if agendaDetails["AuthorID"] != authorID and agendaDetails["Assigned"] != authorID:
+                    continue
+
+                # Append to message
+                message += AgendaType + " " + str(
+                    AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+            if len(message) == 0:
+                message += "Nothing found for you."
+        else:
+            message += "Nothing found."
+
+    AgendaType = AgendaType[2:]
+    # Group Agenda (only assigned to the user)
+    message += "\nGroup {}s:\n".format(AgendaType)
+    for RoleID in authorRoleIDList:
+        submessage = ""
+        Role = ctx.guild.get_role(RoleID)
+        RoleName = Role.name
+        if(RoleName == "@everyone"):
+            RoleName = "everyone"
+        submessage += "{}:\n".format(RoleName) 
+        AgendaIDList = table[AgendaType]
         
 
         # Check each entry in the AgendaTable
@@ -536,17 +570,17 @@ def personal_list_agenda(ctx, AgendaType, args=None):
                 agendaName = agendaArguments[0]
                 
                 # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
-                if agendaDetails["GroupID"] not in authorRoles and agendaDetails["AuthorID"] != authorID and agendaDetails["Assigned"] != authorID:
+                if agendaDetails["GroupID"] not in authorRoles and (agendaDetails["AuthorID"] != authorID or agendaDetails["Assigned"] != authorID):
                     continue
 
                 # Append to message
-                message += AType + " " + str(
-                    AgendaIDList.index(i)) + " \t" + agendaName + "\n"
-            if len(message) == 0:
-                message += "Nothing found for you."
+                submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+            if submessage == "{}:\n".format(RoleName):
+                submessage += "Nothing found."
         else:
-            message += "Nothing found."
-        message += "\n"
+            submessage += "Nothing found."
+        message += submessage +"\n"
+    message += "\n"
 
     return message
 

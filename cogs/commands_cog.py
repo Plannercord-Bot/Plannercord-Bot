@@ -305,6 +305,16 @@ class TestCommands(commands.Cog):
         await ctx.send("Start")
         await periodic_checker(ctx)
 
+    ## Delete Collection Command
+    @commands.command(
+        help=
+        "Debug command; deletes the guild's collection in the database",  #shows when ;help [command] called
+        brief="Delete current discord server data from database"  #shows when ;help is called
+    )
+    async def clearserver(self, ctx, *args):
+        await ctx.send("Test Start")
+        await delCollection(ctx)
+
     ## Test Function Command
     @commands.command(
         help=
@@ -1078,14 +1088,24 @@ class RequestPersonalCommands(commands.Cog):
     )
     async def mytasks(self, ctx, *args):
         AgendaType = "MyTask"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The mytasks command requires no argument.\n"
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The mytasks command can accept only 1 argument.\n"
                             "Type ;help mytasks for more information.")
             return
 
         
-        message = personal_list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal tasks are:\n{message}")  #bot reply
     
@@ -1101,9 +1121,19 @@ class RequestPersonalCommands(commands.Cog):
     )
     async def myprojs(self, ctx, *args):
         AgendaType = "MyProject"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The myprojs command requires no argument.\n"
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The myprojs command can accept only 1 argument.\n"
                             "Type ;help myprojs for more information.")
             return
 
@@ -1124,9 +1154,19 @@ class RequestPersonalCommands(commands.Cog):
     )
     async def mymeets(self, ctx, *args):
         AgendaType = "MyMeeting"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The mymeets command requires no argument.\n"
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The mymeets command can accept only 1 argument.\n"
                             "Type ;help mymeets for more information.")
             return
 
@@ -1147,9 +1187,19 @@ class RequestPersonalCommands(commands.Cog):
     )
     async def myrems(self, ctx, *args):
         AgendaType = "MyReminder"
-        if (len(args) > 0):
-            await ctx.send(f"Invalid number of arguments.\n"
-                            "The myrems command requires no argument.\n"
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+            
+        if (len(args) > 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The myrems command can accept only 1 argument.\n"
                             "Type ;help myrems for more information.")
             return
 
