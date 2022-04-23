@@ -1137,7 +1137,7 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = personal_list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal projects are:\n{message}")  #bot reply
 
@@ -1170,7 +1170,7 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = personal_list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal meetings are:\n{message}")  #bot reply
 
@@ -1203,7 +1203,7 @@ class RequestPersonalCommands(commands.Cog):
             return
 
         
-        message = personal_list_agenda(ctx, AgendaType)
+        message = personal_list_agenda(ctx, AgendaType, args)
 
         await ctx.channel.send(f"{ctx.author.mention} your personal reminders are:\n{message}")  #bot reply
 
@@ -1246,6 +1246,28 @@ class UpdateCommands(commands.Cog):
         message = delete_agenda(ctx, args)
 
         await ctx.channel.send(message)  #bot reply
+      
+    ## More Update commands
+      
+    # ;updatename <AgendaType>;<AgendaID>;<NewName>
+        # <AgendaType> - Error if type does not exist
+        # <AgendaID> - Error if data does not exist (i.e. wala pang task 3 but u tryna update it already)
+
+    # ;updatedue <AgendaType>;<AgendaID>;<NewDueDate> 
+        # <AgendaType> - Error if type does not exist
+        # <AgendaID> - Error if data does not exist (i.e. wala pang task 3 but u tryna update it already)
+        # <NewDueDate> - Error if: 
+                            # - di datetime and 
+                            # - if it is earlier than today (?)
+
+    # ;assign <AgendaType>;<AgendaID>;<NewUser> (Throw error if not in your group/your server yung user)
+        # <AgendaType> - Error if type does not exist
+        # <AgendaID> - Error if:
+                        # - data does not exist (i.e. wala pang task 3 but u tryna update it already)
+                        # - not an agenda of your group
+        # <NewUser> - Error if:
+                        # - not in your group (compare member.roles to agenda's "GroupID" attribute)
+                        # - not a member of the server
 
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
