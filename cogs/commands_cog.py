@@ -323,7 +323,8 @@ class TestCommands(commands.Cog):
     )
     async def testfunc(self, ctx, *args):
         await ctx.send("Test Start")
-        await testfunction(ctx)
+        message = summary_agenda(ctx)
+        await ctx.send(message)
 
 """
 
@@ -1080,7 +1081,7 @@ class RequestPersonalCommands(commands.Cog):
         help=
         "Request all Personal Tasks with Task ID and the ones assigned or created by you from the database\n\n"
         "Format:\n"
-        "\t;mytasks\n\n"
+        "\t;mytasks <Role Name>\n\n"
         "Required Arguments:\n"
         "\tNone",  #shows when ;help [command] called
         brief="Request all personal tasks"  #shows when ;help is called 
@@ -1213,7 +1214,7 @@ class UpdateCommands(commands.Cog):
 
     #Commands
 
-    ## Request Personal Task Command
+    ## Delete Task Command -
     @commands.command(
         help=
         "Delete specific agenda from the database\n\n"
@@ -1248,10 +1249,23 @@ class UpdateCommands(commands.Cog):
         await ctx.channel.send(message)  #bot reply
       
     ## More Update commands
-      
+
     # ;updatename <AgendaType>;<AgendaID>;<NewName>
         # <AgendaType> - Error if type does not exist
         # <AgendaID> - Error if data does not exist (i.e. wala pang task 3 but u tryna update it already)
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+    async def a(self, ctx, *args):
+        pass
+    
 
     # ;updatedue <AgendaType>;<AgendaID>;<NewDueDate> 
         # <AgendaType> - Error if type does not exist
@@ -1259,6 +1273,19 @@ class UpdateCommands(commands.Cog):
         # <NewDueDate> - Error if: 
                             # - di datetime and 
                             # - if it is earlier than today (?)
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+    async def b(self, ctx, *args):
+        pass
+
 
     # ;assign <AgendaType>;<AgendaID>;<NewUser> (Throw error if not in your group/your server yung user)
         # <AgendaType> - Error if type does not exist
@@ -1268,7 +1295,146 @@ class UpdateCommands(commands.Cog):
         # <NewUser> - Error if:
                         # - not in your group (compare member.roles to agenda's "GroupID" attribute)
                         # - not a member of the server
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+    async def c(self, ctx, *args):
+        pass
 
+
+    # ;rem <AgendaType>;<AgendaID>;<NewUser> (Throw error if not in your group/your server yung user)
+        # <TaskID> - Error if:
+                        # - data does not exist (i.e. wala pang task 3 but u tryna update it already)
+                        # - not an agenda of your group
+        # <NewUser> - Error if:
+                        # - not in your group (compare member.roles to agenda's "GroupID" attribute)
+                        # - not a member of the server
+
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+    async def d(self, ctx, *args):
+        pass
+
+    @commands.command(
+        help=
+        "Delete specific agenda from the database\n\n"
+        "Format:\n"
+        "\t;delete <agenda type> <agenda id>\n\n"
+        "Required Arguments:\n"
+        "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
+        brief="Delete an agenda"  #shows when ;help is called 
+    )
+
+    # Prototype only, taken from stackoverflow
+    async def poll(self, ctx, question, *options: str):
+        await ctx.send("Hello")
+        if len(options) > 2:
+            await ctx.send('```Error! Syntax = [~poll "question" "option1" "option2"] ```')
+            return
+
+        if len(options) == 2 and options[0] == "yes" and options[1] == "no":
+            reactions = ['👍', '👎']
+        else:
+            reactions = ['👍', '👎']
+
+        description = []
+        for x, option in enumerate(options):
+            description += '\n {} {}'.format(reactions[x], option)
+
+        poll_embed = discord.Embed(title=question, color=0x31FF00, description=''.join(description))
+
+        react_message = await ctx.send(embed=poll_embed)
+
+        for reaction in reactions[:len(options)]:
+            await react_message.add_reaction(reaction)
+
+class RequestSummaryCommands(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
+    #Commands
+
+    @commands.command(
+        help=
+        "Request all Agenda, even those not assigned to you, for all your groups for today from the database\n\n"
+        "Format:\n"
+        "\t;day\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all group agenda for today"  #shows when ;help is called 
+    )
+    async def day(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The day command accepts no argument.\n"
+                            "Type ;help day for more information.")
+            return
+
+        
+        message = summary_agenda(ctx,"Day")
+
+        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for today are:\n{message}")  #bot reply
+
+    @commands.command(
+        help=
+        "Request all Agenda, even those not assigned to you, for all your groups for this week from the database\n\n"
+        "Format:\n"
+        "\t;week\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all group agenda for this week"  #shows when ;help is called 
+    )
+    async def week(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The week command accepts no argument.\n"
+                            "Type ;help week for more information.")
+            return
+
+        
+        message = summary_agenda(ctx,"Week")
+
+        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for this week are:\n{message}")  #bot reply
+
+    @commands.command(
+        help=
+        "Request all Agenda, even those not assigned to you, for all your groups for this month from the database\n\n"
+        "Format:\n"
+        "\t;month\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all group agenda for this month"  #shows when ;help is called 
+    )
+    async def month(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The month command accepts no argument.\n"
+                            "Type ;help month for more information.")
+            return
+
+        
+        message = summary_agenda(ctx,"Month")
+
+        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for this month are:\n{message}")  #bot reply
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
     bot.add_cog(ServerCommands(bot))
@@ -1278,3 +1444,4 @@ def setup(bot):
     bot.add_cog(RequestGroupCommands(bot))
     bot.add_cog(RequestPersonalCommands(bot))
     bot.add_cog(UpdateCommands(bot))
+    bot.add_cog(RequestSummaryCommands(bot))
