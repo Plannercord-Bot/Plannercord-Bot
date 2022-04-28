@@ -1220,3 +1220,7 @@ async def poll_agenda(ctx, args):
         await react_message.add_reaction(reactions[i])
 
 
+def add_reminder(ctx, args):
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"

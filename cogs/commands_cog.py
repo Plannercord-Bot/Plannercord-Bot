@@ -1297,13 +1297,14 @@ class UpdateCommands(commands.Cog):
                             # - if it is earlier than today (?)
     @commands.command(
         help=
-        "Delete specific agenda from the database\n\n"
+        "Update deadline of specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type> <agenda id>\n\n"
+        "\t;updatedue <agenda type>;<agenda id>;<Date in mm-dd-yy>;<Time in hh:mm>\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
-        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
-        brief="Delete an agenda"  #shows when ;help is called 
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs\n\n"
+        "\t<Date or Time> - in mm-dd-yy if date or hh:mm if time",  #shows when ;help [command] called
+        brief="Update agenda deadline"  #shows when ;help is called 
     )
     async def updatedue(self, ctx, *args):
         if (len(args) < 1):
@@ -1345,7 +1346,7 @@ class UpdateCommands(commands.Cog):
         if (len(args) < 1):
             await ctx.send(f"Invalid number of Arguments.\n"
                            "The assign command requires 3 arguments.\n"
-                           "Type ;help poll for more information.")
+                           "Type ;help assign for more information.")
             return
 
         # Arguments after command are joined and manually separated using specified delimiter ';'
@@ -1374,17 +1375,44 @@ class UpdateCommands(commands.Cog):
 
     @commands.command(
         help=
-        "Delete specific agenda from the database\n\n"
+        "Make a reminder for a specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type> <agenda id>\n\n"
+        "\t;remind <agenda type>;<agenda id>;\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
         brief="Delete an agenda"  #shows when ;help is called 
     )
     async def remind(self, ctx, *args):
-        pass
+        AgendaType = "Reminder"
+        if (len(args) < 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "The remind command requires 3 arguments.\n"
+                           "Type ;help remind for more information.")
+            return
 
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+        print("Here")
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        print("There")
+        print(len(args))
+        if (len(args) > 3):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "More arguments than required detected.\n"
+                           "Type ;help addrem for more information.")
+            return
+        args[0] = " ".join([args[0],args[1]])
+        args.remove(args[1])
+        print(args)
+        message = await add_agenda(ctx, AgendaType, args)
+        await ctx.channel.send(message)
 
 
     @commands.command(
