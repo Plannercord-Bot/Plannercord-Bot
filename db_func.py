@@ -6,6 +6,7 @@ import os
 from decouple import config
 from datetime import datetime, date, timedelta
 import asyncio
+import emoji
 
 # Import secret mongodb_server, exit if not configured properly
 try:
@@ -639,6 +640,7 @@ async def agendaTimeCheck(bot, then):
                             # Compare alert_time to the next minute, if equal, send a message
                             if(alert_time == then_with_offset):
                                 message = formattedAlert(agenda_details, guild)
+                                message = "{} Alert!\n\n{}\n".format(agenda_details["AgendaType"], message) 
                                 await channel.send(message)
                                 # collection.delete_one({"_id": i})
                             print("\tAlert Time: " + str(alert_time))
@@ -682,7 +684,6 @@ def formattedAlert(data, guild):
         attributes = ["Name: ", "Date & Time: "]
         message += attributes[i] + str(args[i]) + "\n"
 
-    message = "{} Alert!\n\n".format(data["AgendaType"]) + message + "\n"
     return message           
 
 
@@ -949,3 +950,43 @@ def personal_summary_agenda(ctx, period):
             message += subheadermessage + submessage +"\n"
 
     return message
+
+async def poll_agenda(ctx, args):
+    
+    AgendaType = args[0]
+    AgendaID = args[1]
+    poll_title = args[2]
+    agenda = find_agenda(ctx, AgendaType, [AgendaID])
+    if agenda == f"Sorry, that {AgendaType} does not yet exist.":
+        await ctx.send(agenda)
+        return
+    elif agenda == f"You do not have the permission to view or access this {AgendaType}.":
+        await ctx.send(agenda)
+        return
+    args.remove(args[0])
+    args.remove(args[0])
+    args.remove(args[0])
+    description = []
+    reactions = [chr(i) for i in range(ord(u"\U0001F1E6"), ord(u"\U0001F1FF") + 1)]
+    for x, option in enumerate(args):
+        description += '\n {} {}'.format(reactions[x], option)
+
+    poll_embed = discord.Embed(
+                                title = poll_title, 
+                                color = 0x31FF00, 
+                                description = ''.join(description))
+    poll_embed.add_field(
+                        name = AgendaType, 
+                        value = agenda, 
+                        inline = False)
+    
+    poll_embed.add_field(
+                        name = "Vote!", 
+                        value = "React with the corresponding emoji to vote for your choice.", 
+                        inline = False)
+    react_message = await ctx.send(embed=poll_embed)
+
+    for i in range(len(args)):
+        await react_message.add_reaction(reactions[i])
+
+# string of alphabet lower case

@@ -1,3 +1,4 @@
+import argparse
 import discord
 from discord.ext import commands
 import pymongo
@@ -1263,7 +1264,7 @@ class UpdateCommands(commands.Cog):
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
         brief="Delete an agenda"  #shows when ;help is called 
     )
-    async def a(self, ctx, *args):
+    async def updatename(self, ctx, *args):
         pass
     
 
@@ -1283,7 +1284,7 @@ class UpdateCommands(commands.Cog):
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
         brief="Delete an agenda"  #shows when ;help is called 
     )
-    async def b(self, ctx, *args):
+    async def updatedue(self, ctx, *args):
         pass
 
 
@@ -1305,7 +1306,7 @@ class UpdateCommands(commands.Cog):
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
         brief="Delete an agenda"  #shows when ;help is called 
     )
-    async def c(self, ctx, *args):
+    async def assign(self, ctx, *args):
         pass
 
 
@@ -1327,42 +1328,80 @@ class UpdateCommands(commands.Cog):
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
         brief="Delete an agenda"  #shows when ;help is called 
     )
-    async def d(self, ctx, *args):
+    async def remind(self, ctx, *args):
         pass
 
     @commands.command(
         help=
-        "Delete specific agenda from the database\n\n"
+        "Create a Poll about a specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type> <agenda id>\n\n"
+        "\t;poll <agenda type>;<agenda id>;<poll question>;<options>*\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
-        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
-        brief="Delete an agenda"  #shows when ;help is called 
+        "\t<agenda id> - use command ;tasks, ;projs, ;meets, ;rems to know the agenda IDs\n\n"
+        "\t<poll question> - Type here your question for the task\n\n"
+        "\t<options> - The options for this poll separated by semicolons",  #shows when ;help [command] called
+        brief="Create a poll about an agenda"  #shows when ;help is called 
     )
 
     # Prototype only, taken from stackoverflow
-    async def poll(self, ctx, question, *options: str):
+    async def poll(self, ctx, *args):
         await ctx.send("Hello")
-        if len(options) > 2:
-            await ctx.send('```Error! Syntax = [~poll "question" "option1" "option2"] ```')
+        if (len(args) < 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "The poll command requires at least 5 arguments.\n"
+                           "Type ;help poll for more information.")
             return
 
-        if len(options) == 2 and options[0] == "yes" and options[1] == "no":
-            reactions = ['👍', '👎']
-        else:
-            reactions = ['👍', '👎']
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
 
-        description = []
-        for x, option in enumerate(options):
-            description += '\n {} {}'.format(reactions[x], option)
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
 
-        poll_embed = discord.Embed(title=question, color=0x31FF00, description=''.join(description))
 
-        react_message = await ctx.send(embed=poll_embed)
+        # Function starts here
+        message = await poll_agenda(ctx, args)
+        
+        
 
-        for reaction in reactions[:len(options)]:
-            await react_message.add_reaction(reaction)
+        
+    
+    # async def addmytask(self, ctx, *args):
+    #     AgendaType = "MyTask"
+    #     print(len(args))
+    #     if (len(args) < 1):
+    #         await ctx.send(f"Invalid number of Arguments.\n"
+    #                        "The addmtask command requires Task Name argument.\n"
+    #                        "Type ;help addmytask for more information.")
+    #         return
+
+    #     # Arguments after command are joined and manually separated using specified delimiter ';'
+    #     string = " ".join(args)
+    #     args = string.split(";")
+
+    #     i = 0
+    #     while i < len(args):
+    #       print(args)
+    #       if len(args[i])<1:
+    #         args.remove(args[i])
+    #         i = i-1
+    #       i+=1
+            
+    #     if (len(args) > 3):
+    #         await ctx.send(f"Invalid number of Arguments.\n"
+    #                        "More arguments than required detected.\n"
+    #                        "Type ;help addmytask for more information.")
+    #         return
+
+    #     message = await add_agenda(ctx, AgendaType, args)
+
+    #     await ctx.channel.send(message)  #bot reply
 
 class RequestSummaryCommands(commands.Cog):
     def __init__(self, bot):
