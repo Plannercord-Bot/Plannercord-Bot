@@ -323,7 +323,7 @@ class TestCommands(commands.Cog):
     )
     async def testfunc(self, ctx, *args):
         await ctx.send("Test Start")
-        message = summary_agenda(ctx)
+        message = personal_summary_agenda(ctx)
         await ctx.send(message)
 
 """
@@ -1435,6 +1435,73 @@ class RequestSummaryCommands(commands.Cog):
         message = summary_agenda(ctx,"Month")
 
         await ctx.channel.send(f"{ctx.author.mention} your group Agenda for this month are:\n{message}")  #bot reply
+
+    @commands.command(
+        help=
+        "Request all Personal Agenda (and those assigned to you in your groups) for today from the database\n\n"
+        "Format:\n"
+        "\t;myday\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all personal agenda for today"  #shows when ;help is called 
+    )
+    async def myday(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The myday command accepts no argument.\n"
+                            "Type ;help myday for more information.")
+            return
+
+        
+        message = personal_summary_agenda(ctx,"Day")
+
+        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for today are:\n{message}")  #bot reply
+    
+    @commands.command(
+        help=
+        "Request all Personal Agenda (and those assigned to you in your groups) for this week from the database\n\n"
+        "Format:\n"
+        "\t;myweek\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all personal agenda for this week"  #shows when ;help is called 
+    )
+    async def myweek(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The myweek command accepts no argument.\n"
+                            "Type ;help myweek for more information.")
+            return
+
+        
+        message = personal_summary_agenda(ctx,"Week")
+
+        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for this week are:\n{message}")  #bot reply
+
+    @commands.command(
+        help=
+        "Request all Personal Agenda (and those assigned to you in your groups) for this month from the database\n\n"
+        "Format:\n"
+        "\t;mymonth\n\n"
+        "Required Arguments:\n"
+        "\tNone",  #shows when ;help [command] called
+        brief="Request all personal agenda for this month"  #shows when ;help is called 
+    )
+    async def mymonth(self, ctx, *args):
+            
+        if (len(args) > 0):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                            "The mymonth command accepts no argument.\n"
+                            "Type ;help mymonth for more information.")
+            return
+
+        
+        message = personal_summary_agenda(ctx,"Month")
+
+        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for this month are:\n{message}")  #bot reply
+
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
     bot.add_cog(ServerCommands(bot))

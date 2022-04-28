@@ -830,3 +830,122 @@ def summary_agenda(ctx, period):
             message += subheadermessage + submessage +"\n"
 
     return message
+
+def personal_summary_agenda(ctx, period):
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorRoles = [i.name for i in ctx.author.roles]
+    authorID = ctx.author.id
+    authorRoleIDList = [i.id for i in ctx.author.roles]
+    
+    # Data Querying, get the AgendaTable
+    table = collection.find_one({"Type": "AgendaTable"})
+
+    # Initialize message
+    message = ""
+
+    # Personal Agenda First
+    message += "Personal:\n"
+    for AgendaType in ["MyTask", "MyProject", "MyMeeting", "MyReminder"]:
+            # Initialize submessage per Role/Group
+            submessage1 = ""
+            subheadermessage1 = "\t{}:\n".format(AgendaType)
+            AgendaIDList = table[AgendaType]
+
+            # Check each entry in the AgendaTable
+            if (len(AgendaIDList) > 0):
+                for i in AgendaIDList:
+                    agendaDetails = collection.find_one({"_id": i})
+                    agendaArguments = agendaDetails['Args']
+                    agendaName = agendaArguments[0]
+                    
+                    
+                    # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
+                    if agendaDetails["AuthorID"] != authorID and agendaDetails["Assigned"] != authorID:
+                        continue
+                    try:
+                        agendaDateTime = agendaArguments[1]
+                        agendaTime = agendaDateTime.time()
+                        if(period =="Day"):
+                        # Check if the date of the agenda is today
+                            if agendaDateTime.date() != date.today():
+                                continue
+                        elif(period =="Month"):
+                            if agendaDateTime.date().month != date.today().month:
+                                continue
+                        elif(period =="Week"):
+                            if agendaDateTime.strftime("%U") != date.today().strftime("%U"):
+                                continue
+                    except:
+                        print("No date found")
+                        continue
+
+                    
+                    # Append to message
+                    agendaIndex = AgendaIDList.index(i)
+                    submessage1 += f"\t\t\t{AgendaType}\t{agendaIndex}\t{agendaName}\t{agendaDateTime.date()}\t{agendaTime}\n"
+                if submessage1 == "":
+                    submessage1 += "\t\t\tNothing found.\n"
+            else:
+                submessage1 += "\t\t\tNothing found.\n"
+            message += subheadermessage1 + submessage1 +"\n"
+    message += "Group (only those assigned to you):\n"
+    # Iterate through the author's roles
+    for RoleID in authorRoleIDList:
+        print(RoleID)
+        Role = ctx.guild.get_role(RoleID)
+        RoleName = Role.name
+        if(RoleName == "@everyone"):
+            RoleName = "everyone"
+        headermessage = "\t{}:\n".format(RoleName)
+        
+        message += headermessage
+        for AgendaType in ["Task", "Project", "Meeting", "Reminder"]:
+            # Initialize submessage per Role/Group
+            submessage = ""
+            subheadermessage = "\t\t{}:\n".format(AgendaType)
+            AgendaIDList = table[AgendaType]
+
+            # Check each entry in the AgendaTable
+            if (len(AgendaIDList) > 0):
+                for i in AgendaIDList:
+                    agendaDetails = collection.find_one({"_id": i})
+                    agendaArguments = agendaDetails['Args']
+                    agendaName = agendaArguments[0]
+                    
+                    
+                    # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
+                    if agendaDetails["GroupID"] != RoleID:
+                        continue
+                    try:
+                        agendaDateTime = agendaArguments[1]
+                        agendaTime = agendaDateTime.time()
+                        if(period =="Day"):
+                        # Check if the date of the agenda is today
+                            if agendaDateTime.date() != date.today():
+                                continue
+                        elif(period =="Month"):
+                            if agendaDateTime.date().month != date.today().month:
+                                continue
+                        elif(period =="Week"):
+                            if agendaDateTime.strftime("%U") != date.today().strftime("%U"):
+                                continue
+                    except:
+                        print("No date found")
+                        continue
+
+                    
+                    # Append to message
+                    agendaIndex = AgendaIDList.index(i)
+                    submessage += f"\t\t\t{AgendaType}\t{agendaIndex}\t{agendaName}\t{agendaDateTime.date()}\t{agendaTime}\n"
+                if submessage == "":
+                    submessage += "\t\t\tNothing found.\n"
+            else:
+                submessage += "\t\t\tNothing found.\n"
+            message += subheadermessage + submessage +"\n"
+
+    return message
