@@ -585,6 +585,236 @@ def personal_list_agenda(ctx, AgendaType, args):
 
     return message
 
+def change_agenda_name(ctx, AgendaType, args):
+
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+    
+    if AgendaType in ["MyTask", "MyProject", "MyMeeting", "MyReminder"]:
+        return "You cannot assign personal agenda to other users."
+    
+    # Separate args into useful
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i != '']
+
+    task_name = args[1]
+
+
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorID = ctx.author.id
+
+
+    # Get data from database based on agendatype
+    table = collection.find_one({"Type": "AgendaTable"})
+    AgendaIDList = table[AgendaType]
+
+        
+
+    try:
+        AgendaID = int(args[0])
+    except ValueError:
+        return "Please specify the ID of the agenda you want to change."
+
+    if AgendaID >= len(AgendaIDList):
+        return "Agenda ID not found."
+    if AgendaID < 0:
+        return "Agenda ID not found."
+
+    # Check if the user is allowed to change the agenda
+    agendaData = collection.find_one({"_id": AgendaIDList[AgendaID]})
+
+    if agendaData["AuthorID"] != authorID and agendaData["Assigned"] != authorID:
+        return "You are not allowed to change this agenda's details."
+
+    # Change the args
+    new_args = agendaData["Args"]
+
+    # Change the task name to task_name
+    new_args[0] = task_name
+    collection.update_one({"_id": AgendaIDList[AgendaID]}, {"$set": {"Args": new_args}})
+    return "Agenda details changed."
+
+
+def change_agenda_due(ctx, AgendaType, args):
+
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+    
+    if AgendaType in ["MyTask", "MyProject", "MyMeeting", "MyReminder"]:
+        return "You cannot assign personal agenda to other users."
+
+
+    # Separate args into useful
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i != '']
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+
+    # Check if Date and Time are present or valid
+
+    # Get timezone from database
+    server_data = collection.find_one({"_id": ctx.guild.id})
+    t = server_data['timezone']
+    # Delta is the offset (+8 hours for Manila, Philippines)
+    delta = timedelta(days=t[0], seconds=t[1])
+
+    # Set default
+    newdate = datetime.utcnow() + delta
+    newtime = "00:00"
+
+    # Default DateTime to be sent is today with hour and minute set to 0
+    newdatetime = newdate.replace(hour=0, minute=0)
+
+    # Check if there are Date/Time arguments
+    if len(args) == 2:
+        # Check if first argument is date
+        try:
+            # If yes, change
+            newdate = datetime.strptime(args[1], "%m-%d-%y")
+            newdatetime = newdatetime.replace(month=newdate.month,
+                                              day=newdate.day,
+                                              year=newdate.year,
+                                              second=0,
+                                              microsecond=0)
+        except:
+            # If not date, maybe it is time
+            try:
+                newdate = datetime.utcnow() + delta
+                newtime = datetime.strptime(args[1], "%H:%M")
+                newdatetime = newdate.replace(hour=newtime.hour,
+                                              minute=newtime.minute,
+                                              second=0,
+                                              microsecond=0)
+            except:
+                return "Invalid Date or Time format.\nMake sure it follows the right format:\nDate:\tmm-dd-yy\nTime:\thh:mm"
+
+    # Check if the arguments are data and time
+    if len(args) == 3:
+        try:
+            newdatetime = datetime.strptime(args[1] + "," + args[2],
+                                            "%m-%d-%y,%H:%M")
+        except:
+            return "Invalid Date or Time format.\nMake sure it follows the right format:\nDate:\tmm-dd-yy\nTime:\thh:mm"
+
+    # Now we get the local time + timezone offset from UTC
+    local_time = datetime.utcnow() + delta
+    # Check if date time input is in the past or future
+    if len(args) > 1 and newdatetime < local_time:
+        return "Date and/or time not valid.\nMake sure it is scheduled for the future."
+    elif len(args) > 1 and newdatetime > local_time:
+        # If it is valid, then we can replace args[1] to the valid newdatetime and pop the last argument (if more than 2 args)
+        args[1] = newdatetime
+        if len(args) == 3:
+            args.pop()
+
+    
+    authorID = ctx.author.id
+
+
+    # Get data from database based on agendatype
+    table = collection.find_one({"Type": "AgendaTable"})
+    AgendaIDList = table[AgendaType]
+
+
+
+    try:
+        AgendaID = int(args[0])
+    except ValueError:
+        return "Please specify the ID of the agenda you want to change."
+
+    if AgendaID >= len(AgendaIDList):
+        return "Agenda ID not found."
+    if AgendaID < 0:
+        return "Agenda ID not found."
+
+    # Check if the user is allowed to change the agenda
+    agendaData = collection.find_one({"_id": AgendaIDList[AgendaID]})
+
+    if agendaData["AuthorID"] != authorID and agendaData["Assigned"] != authorID:
+        return "You are not allowed to change this agenda's details."
+
+    # Change the args
+    new_args = agendaData["Args"]
+
+    # Change the task name to task_name
+    new_args[1] = args[1]
+    collection.update_one({"_id": AgendaIDList[AgendaID]}, {"$set": {"Args": new_args}})
+    return "Agenda details changed."
+
+
+def change_assigned(ctx, AgendaType, args):
+    # Only proceed if server is registered
+    if str(ctx.guild.id) not in db.list_collection_names():
+        return "Server not yet registered in the database. Please register with the command ;server_register"
+    
+    if AgendaType in ["MyTask", "MyProject", "MyMeeting", "MyReminder"]:
+        return "You cannot assign personal agenda to other users."
+    
+
+    # Separate args into useful
+    args = [i.strip() for i in args]
+    args = [i.strip() for i in args if i != '']
+
+
+    memberIDs = [str(i.id) for i in ctx.guild.members]
+    members = [str(i.name) for i in ctx.guild.members]
+    user = args[1]
+
+    print(user[2:-1])
+    # Convert the user argument to a member ID
+    if (user[2:-1] in memberIDs):
+        user = ctx.guild.members[memberIDs.index(user[2:-1])]
+
+    elif (user in members):
+        user = ctx.guild.members[members.index(user)]
+    else:
+        return f"{user} is not a member of the server. Try checking your spelling or capitalization."
+
+
+    # The collection (like a sub-database) will depend on the server/guild id
+    collection = db[str(ctx.guild.id)]
+    authorRoles = [i.name for i in user.roles]
+    authorID = ctx.author.id
+    authorRoleIDList = [i.id for i in user.roles]
+
+
+    # Get data from database based on agendatype
+    table = collection.find_one({"Type": "AgendaTable"})
+    AgendaIDList = table[AgendaType]
+
+        
+
+    try:
+        AgendaID = int(args[0])
+    except ValueError:
+        return "Please specify the ID of the agenda you want to change."
+
+    if AgendaID >= len(AgendaIDList):
+        return "Agenda ID not found."
+    if AgendaID < 0:
+        return "Agenda ID not found."
+    # Check if the user is allowed to change the agenda
+    agendaData = collection.find_one({"_id": AgendaIDList[AgendaID]})
+
+    if agendaData["AuthorID"] != authorID and agendaData["Assigned"] != authorID:
+        return "You are not allowed to change this agenda."
+    if agendaData["Assigned"] == user.id:
+        return "This agenda is already assigned to that user."
+    if agendaData["GroupID"] not in authorRoleIDList:
+        return f"The user is not a member of the {AgendaType}'s group"
+    
+
+    # Change the assigned user
+    collection.update_one({"_id": AgendaIDList[AgendaID]}, {"$set": {"Assigned": user.id}})
+    return "Assigned user changed."
+
+
+
 # Function that updates agenda depending on author permissions (if author is part of group)
 def update_agenda(ctx, AgendaType, args):
     # Only proceed if server is registered
@@ -720,10 +950,10 @@ def delete_agenda(ctx, args):
                 return "You do not have permissions to delete this agenda."
             
         except:
-            return "Task not found."
+            return f"{args[0]} not found."
         
     else:
-        return "Task not found."
+        return f"{args[0]} not found."
 
 
 async def testfunction(ctx):
@@ -989,4 +1219,4 @@ async def poll_agenda(ctx, args):
     for i in range(len(args)):
         await react_message.add_reaction(reactions[i])
 
-# string of alphabet lower case
+

@@ -1256,16 +1256,37 @@ class UpdateCommands(commands.Cog):
         # <AgendaID> - Error if data does not exist (i.e. wala pang task 3 but u tryna update it already)
     @commands.command(
         help=
-        "Delete specific agenda from the database\n\n"
+        "Rename specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type> <agenda id>\n\n"
+        "\t;delete <agenda type>;<agenda id>;<task name>\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
-        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
-        brief="Delete an agenda"  #shows when ;help is called 
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs\n\n"
+        "\t<agenda name> - the new name of the agenda",  #shows when ;help [command] called
+        brief="Rename an agenda"  #shows when ;help is called 
     )
     async def updatename(self, ctx, *args):
-        pass
+        if (len(args) < 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "The updatename command requires 3 arguments.\n"
+                           "Type ;help poll for more information.")
+            return
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        AgendaType = args[0]
+        args.remove(args[0])
+
+        message = change_agenda_name(ctx, AgendaType, args)
+        await ctx.channel.send(message)
     
 
     # ;updatedue <AgendaType>;<AgendaID>;<NewDueDate> 
@@ -1285,32 +1306,65 @@ class UpdateCommands(commands.Cog):
         brief="Delete an agenda"  #shows when ;help is called 
     )
     async def updatedue(self, ctx, *args):
-        pass
+        if (len(args) < 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "The updatedue command requires 3 arguments.\n"
+                           "Type ;help updatedue for more information.")
+            return
+
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
+
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        AgendaType = args[0]
+        args.remove(args[0])
+
+        message = change_agenda_due(ctx, AgendaType, args)
+        await ctx.channel.send(message)
 
 
-    # ;assign <AgendaType>;<AgendaID>;<NewUser> (Throw error if not in your group/your server yung user)
-        # <AgendaType> - Error if type does not exist
-        # <AgendaID> - Error if:
-                        # - data does not exist (i.e. wala pang task 3 but u tryna update it already)
-                        # - not an agenda of your group
-        # <NewUser> - Error if:
-                        # - not in your group (compare member.roles to agenda's "GroupID" attribute)
-                        # - not a member of the server
+
     @commands.command(
         help=
-        "Delete specific agenda from the database\n\n"
+        "Reassign specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type> <agenda id>\n\n"
+        "\t;assign <agenda type>;<agenda id>;<member name>\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
-        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
-        brief="Delete an agenda"  #shows when ;help is called 
+        "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs\n\n"
+        "\t<member name> - the name of the member to assign",  #shows when ;help [command] called
+        brief="Reassign an agenda"  #shows when ;help is called 
     )
     async def assign(self, ctx, *args):
-        pass
+        if (len(args) < 1):
+            await ctx.send(f"Invalid number of Arguments.\n"
+                           "The assign command requires 3 arguments.\n"
+                           "Type ;help poll for more information.")
+            return
 
+        # Arguments after command are joined and manually separated using specified delimiter ';'
+        string = " ".join(args)
+        args = string.split(";")
 
-    # ;rem <AgendaType>;<AgendaID>;<NewUser> (Throw error if not in your group/your server yung user)
+        i = 0
+        while i < len(args):
+          if len(args[i])<1:
+            args.remove(args[i])
+            i = i-1
+          i+=1
+        AgendaType = args[0]
+        args.remove(args[0])
+
+        message = change_assigned(ctx, AgendaType, args)
+        await ctx.channel.send(message)
+
+    # ;remind <AgendaType>;<AgendaID>;<Time> or <Date><Time> (Throw error if not in your group/your server yung user)
         # <TaskID> - Error if:
                         # - data does not exist (i.e. wala pang task 3 but u tryna update it already)
                         # - not an agenda of your group
@@ -1331,6 +1385,8 @@ class UpdateCommands(commands.Cog):
     async def remind(self, ctx, *args):
         pass
 
+
+
     @commands.command(
         help=
         "Create a Poll about a specific agenda from the database\n\n"
@@ -1344,9 +1400,7 @@ class UpdateCommands(commands.Cog):
         brief="Create a poll about an agenda"  #shows when ;help is called 
     )
 
-    # Prototype only, taken from stackoverflow
     async def poll(self, ctx, *args):
-        await ctx.send("Hello")
         if (len(args) < 1):
             await ctx.send(f"Invalid number of Arguments.\n"
                            "The poll command requires at least 5 arguments.\n"
@@ -1369,39 +1423,6 @@ class UpdateCommands(commands.Cog):
         message = await poll_agenda(ctx, args)
         
         
-
-        
-    
-    # async def addmytask(self, ctx, *args):
-    #     AgendaType = "MyTask"
-    #     print(len(args))
-    #     if (len(args) < 1):
-    #         await ctx.send(f"Invalid number of Arguments.\n"
-    #                        "The addmtask command requires Task Name argument.\n"
-    #                        "Type ;help addmytask for more information.")
-    #         return
-
-    #     # Arguments after command are joined and manually separated using specified delimiter ';'
-    #     string = " ".join(args)
-    #     args = string.split(";")
-
-    #     i = 0
-    #     while i < len(args):
-    #       print(args)
-    #       if len(args[i])<1:
-    #         args.remove(args[i])
-    #         i = i-1
-    #       i+=1
-            
-    #     if (len(args) > 3):
-    #         await ctx.send(f"Invalid number of Arguments.\n"
-    #                        "More arguments than required detected.\n"
-    #                        "Type ;help addmytask for more information.")
-    #         return
-
-    #     message = await add_agenda(ctx, AgendaType, args)
-
-    #     await ctx.channel.send(message)  #bot reply
 
 class RequestSummaryCommands(commands.Cog):
     def __init__(self, bot):
