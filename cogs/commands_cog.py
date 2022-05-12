@@ -394,7 +394,10 @@ class CreateGroupCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Task Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Group Project Command
     @commands.command(
@@ -432,7 +435,10 @@ class CreateGroupCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Project Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Group Meeting Command
     @commands.command(
@@ -470,7 +476,10 @@ class CreateGroupCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Meeting Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Group Reminder Command
     @commands.command(
@@ -508,7 +517,10 @@ class CreateGroupCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Reminder Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 class CreatePersonalCommands(commands.Cog):
     """
@@ -569,7 +581,10 @@ class CreatePersonalCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Task Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Personal Project Command
     @commands.command(
@@ -607,7 +622,10 @@ class CreatePersonalCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Project Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Personal Meeting Command
     @commands.command(
@@ -645,7 +663,10 @@ class CreatePersonalCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Meeting Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Add Personal Reminder Command
     @commands.command(
@@ -683,7 +704,10 @@ class CreatePersonalCommands(commands.Cog):
 
         message = await add_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Reminder Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 class RequestGroupCommands(commands.Cog):
     def __init__(self, bot):
@@ -720,7 +744,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Task", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request Group Project Command
     @commands.command(
@@ -751,7 +778,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Project", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request Group Meeting Command
     @commands.command(
@@ -782,7 +812,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Meeting", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request Group Reminder Command
     @commands.command(
@@ -813,7 +846,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Reminder", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
     ## Request All Group Tasks Command - 
     @commands.command(
@@ -845,7 +881,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your group tasks are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group tasks are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
     ## Request All Group Projects Command - 
     @commands.command(
@@ -878,7 +917,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your group projects are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group projects are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request All Group Meetings Command - 
     @commands.command(
@@ -911,7 +953,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your group meetings are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group Meetings are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request All Group Reminders Command - 
     @commands.command(
@@ -944,7 +989,10 @@ class RequestGroupCommands(commands.Cog):
         
         message = list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your group reminders are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group Reminders are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 # Add the command group classes
 class RequestPersonalCommands(commands.Cog):
@@ -982,7 +1030,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Task", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request Personal Project Command
     @commands.command(
@@ -1013,7 +1064,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Project", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request Personal Meeting Command
     @commands.command(
@@ -1044,7 +1098,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Meeting", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
       
     ## Request Personal Reminder Command
     @commands.command(
@@ -1075,7 +1132,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_find_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Reminder", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
     ## Request All Personal Tasks Command - 
     @commands.command(
@@ -1108,7 +1168,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal tasks are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal tasks are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
     ## Request All Personal Projects Command - 
     @commands.command(
@@ -1141,7 +1204,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal projects are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal projects are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request All Personal Meetings Command - 
     @commands.command(
@@ -1174,7 +1240,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal meetings are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal meetings are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     ## Request All Personal Reminders Command - 
     @commands.command(
@@ -1207,7 +1276,10 @@ class RequestPersonalCommands(commands.Cog):
         
         message = personal_list_agenda(ctx, AgendaType, args)
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal reminders are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal reminders are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 class UpdateCommands(commands.Cog):
     def __init__(self, bot):
@@ -1247,7 +1319,10 @@ class UpdateCommands(commands.Cog):
         
         message = delete_agenda(ctx, args)
 
-        await ctx.channel.send(message)  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Agenda Deleted", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
       
     ## More Update commands
 
@@ -1286,7 +1361,10 @@ class UpdateCommands(commands.Cog):
         args.remove(args[0])
 
         message = change_agenda_name(ctx, AgendaType, args)
-        await ctx.channel.send(message)
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Name Updated", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
 
     # ;updatedue <AgendaType>;<AgendaID>;<NewDueDate> 
@@ -1327,7 +1405,10 @@ class UpdateCommands(commands.Cog):
         args.remove(args[0])
 
         message = change_agenda_due(ctx, AgendaType, args)
-        await ctx.channel.send(message)
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Due Updated",
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 
 
@@ -1363,7 +1444,10 @@ class UpdateCommands(commands.Cog):
         args.remove(args[0])
 
         message = change_assigned(ctx, AgendaType, args)
-        await ctx.channel.send(message)
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Assignment Successful", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     # ;remind <AgendaType>;<AgendaID>;<Time> or <Date><Time> (Throw error if not in your group/your server yung user)
         # <TaskID> - Error if:
@@ -1412,7 +1496,10 @@ class UpdateCommands(commands.Cog):
         args.remove(args[1])
         print(args)
         message = await add_agenda(ctx, AgendaType, args)
-        await ctx.channel.send(message)
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "Reminder Added", 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 
     @commands.command(
@@ -1478,7 +1565,11 @@ class RequestSummaryCommands(commands.Cog):
         
         message = summary_agenda(ctx,"Day")
 
-        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for today are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group Agenda for today are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
+        
 
     @commands.command(
         help=
@@ -1500,7 +1591,10 @@ class RequestSummaryCommands(commands.Cog):
         
         message = summary_agenda(ctx,"Week")
 
-        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for this week are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group Agenda for this week are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply  #bot reply
 
     @commands.command(
         help=
@@ -1522,7 +1616,10 @@ class RequestSummaryCommands(commands.Cog):
         
         message = summary_agenda(ctx,"Month")
 
-        await ctx.channel.send(f"{ctx.author.mention} your group Agenda for this month are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your group Agenda for this month are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     @commands.command(
         help=
@@ -1544,7 +1641,10 @@ class RequestSummaryCommands(commands.Cog):
         
         message = personal_summary_agenda(ctx,"Day")
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for today are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal Agenda for today are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
     
     @commands.command(
         help=
@@ -1566,7 +1666,10 @@ class RequestSummaryCommands(commands.Cog):
         
         message = personal_summary_agenda(ctx,"Week")
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for this week are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal Agenda for this week are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
     @commands.command(
         help=
@@ -1588,7 +1691,10 @@ class RequestSummaryCommands(commands.Cog):
         
         message = personal_summary_agenda(ctx,"Month")
 
-        await ctx.channel.send(f"{ctx.author.mention} your personal Agenda for this month are:\n{message}")  #bot reply
+        await ctx.channel.send(embed = discord.Embed(
+                                title = "{} your personal Agenda for this month are:\n".format(ctx.author), 
+                                color = 0x31FF00, 
+                                description = message))  #bot reply
 
 def setup(bot):
     bot.add_cog(SystemListeners(bot))
