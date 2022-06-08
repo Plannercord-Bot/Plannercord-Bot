@@ -1445,7 +1445,7 @@ class UpdateCommands(commands.Cog):
 
         message = change_assigned(ctx, AgendaType, args)
         await ctx.channel.send(embed = discord.Embed(
-                                title = "Assignment Successful", 
+                                title = "Changing Assignment", 
                                 color = 0x31FF00, 
                                 description = message))  #bot reply
 
