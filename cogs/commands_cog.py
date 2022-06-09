@@ -1333,7 +1333,7 @@ class UpdateCommands(commands.Cog):
         help=
         "Rename specific agenda from the database\n\n"
         "Format:\n"
-        "\t;delete <agenda type>;<agenda id>;<task name>\n\n"
+        "\t;updatename <agenda type>;<agenda id>;<task name>\n\n"
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs\n\n"
@@ -1465,7 +1465,7 @@ class UpdateCommands(commands.Cog):
         "Required Arguments:\n"
         "\t<agenda type> - Task, Project, Meeting, Reminder\n\n"
         "\t<agenda id> - use command ;mytasks, ;myprojs, ;mymeets, ;myrems to know the agenda IDs",  #shows when ;help [command] called
-        brief="Delete an agenda"  #shows when ;help is called 
+        brief="Create a reminder for an agenda"  #shows when ;help is called 
     )
     async def remind(self, ctx, *args):
         AgendaType = "Reminder"
