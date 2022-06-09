@@ -476,11 +476,12 @@ def list_agenda(ctx, AgendaType, args=None):
                 agendaName = agendaArguments[0]
                 
                 # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
-                if agendaDetails["GroupID"] != RoleID:
+                if agendaDetails["GroupID"] == RoleID:
+                    submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+                else:
                     continue
 
                 # Append to message
-                submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
             if submessage == "{}:\n".format(RoleName):
                 submessage += "Nothing found."
         else:
@@ -571,11 +572,12 @@ def personal_list_agenda(ctx, AgendaType, args):
                 agendaName = agendaArguments[0]
                 
                 # List only if user is allowed to view the data (check if user is the author or if user is in the same group)
-                if agendaDetails["GroupID"] not in authorRoles and (agendaDetails["AuthorID"] != authorID or agendaDetails["Assigned"] != authorID):
-                    continue
+                if agendaDetails["GroupID"] == RoleID and (agendaDetails["AuthorID"] == authorID or agendaDetails["Assigned"] == authorID):
+                    submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
 
-                # Append to message
-                submessage += AgendaType + " " + str(AgendaIDList.index(i)) + " \t" + agendaName + "\n"
+                else:
+                    continue
+                
             if submessage == "{}:\n".format(RoleName):
                 submessage += "Nothing found."
         else:
