@@ -324,7 +324,7 @@ class TestCommands(commands.Cog):
     )
     async def testfunc(self, ctx, *args):
         await ctx.send("Test Start")
-        message = personal_summary_agenda(ctx)
+        message = ""
         await ctx.send(message)
 
 """
@@ -1304,7 +1304,7 @@ class UpdateCommands(commands.Cog):
                             "The delete command requires Agenda Type and Agenda ID argument.\n"
                             "Type ;help delete for more information.")
             return
-        if args[0] not in ["Task", "Project", "Meeting", "Reminder"]:
+        if args[0] not in ["Task", "Project", "Meeting", "Reminder", "MyTask", "MyProject", "MyMeeting", "MyReminder"]:
             await ctx.send(f"Invalid Agenda Type.\n"
                             "The delete command requires Agenda Type and Agenda ID argument.\n"
                             "Type ;help delete for more information.")
